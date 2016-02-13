@@ -18,7 +18,9 @@ Run RRR.py using python 2.7
 ## Required dependencies
 
 tweepy
+
 sortedcontainers 
+
 BeautifulSoup
 
 ## Plugins
@@ -77,29 +79,29 @@ BeautifulSoup
 
 #This bot will also auto detect:
 
- **Subreddit post links** and post its text content in case its a text post or its basic information if its not a text post
+ **Subreddit post links** - post its text content in case its a text post or its basic information if its not a text post
  
- **Tweet links** and post its basic information, if the tweet has a quoted tweet, will post the quoted tweet
+ **Tweet links** - post its basic information, if the tweet has a quoted tweet, will post the quoted tweet
  
- **Steam Store links** and post its basic information as if the user used /steampage
+ **Steam Store links** - post its basic information as if the user used /steampage
  
- **Gfycat links** and return the .gif if the gif can show the preview on Telegram
+ **Gfycat links** - return the .gif if the gif can show the preview on Telegram
  
- **Good night messages** with special messages for admin
+ **Good night messages** - with special messages for admin
  
  **Fuck you messages**
  
  **Beep, Boop**
  
- **When mentioned** either Rad Retro Robot or RRR
+ **When mentioned** - either Rad Retro Robot or RRR
  
  **Hi**
  
- **Love** with special messages for admin
+ **Love** - with special messages for admin
  
- **Shutup.** or **shut up.** Only from admin
+ **Shutup.** or **shut up.** - Only from admin
  
- **Bop** Only from admin
+ **Bop** - Only from admin
  
 
 ## Disclaimer
