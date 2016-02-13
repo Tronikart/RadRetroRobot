@@ -1938,7 +1938,7 @@ def steam_details(message):
 					for detail in details[0].find_all('div'):
 						if detail.text:
 							detlist += "> " + detail.text + "\n"
-
+					price = soup.findAll('div', class_="game_purchase_price price")
 					if not price:
 						price = soup.findAll('div', class_="discount_final_price")
 						price = price[0].string
