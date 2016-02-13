@@ -8,14 +8,12 @@ import time
 import json
 import re
 import tweepy
-import wikipedia
 import datetime
 import time
 import binascii
 from bs4 import BeautifulSoup
 from tweepy import OAuthHandler
 from telebot import types
-from sortedcontainers import SortedDict
 
 
 def init_towers(towerstate):
@@ -162,8 +160,6 @@ def addUser(userID, userName, filename):
 def loadjson(filename):
 	with open(filename + '.json') as f:
 		data = json.load(f)
-		if filename == "suggestion" or filename == 'todo':
-			data = SortedDict(data)
 	return data
 
 def deljson(value, filename):
@@ -2083,8 +2079,6 @@ def mercadolibre(message):
 		except:
 			bot.reply_to(message, "Something went wront, please try again later.", parse_mode="Markdown")
 		
-
-
 # Dolar today
 
 @bot.message_handler(commands=['dt', 'dolartoday', 'dolortoday'])
