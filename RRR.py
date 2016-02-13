@@ -251,11 +251,7 @@ beeps = [
 			'`No system is safe.`',
 			'`Beep bop son, beep bop`'
 ]
-chavez_list = [
-			'`Malditos chavistas`',
-			'`Maldito Chavez`',
-			'`MALDITOS CHAVISTAS`',
-			'`ME CAGO EN CHAVEZ`'
+
 ]
 repeatMax = 300
 repeat_message = [
@@ -423,7 +419,7 @@ text_messages = {
 		u'`>` /isdown `- <url>`\n'
 		u'`>` /bin `- <option> <text>`\n'
 		u'`> `/lyrics `- <artist> - <song>`\n'
-		u'`> `/diceroll `- <faces>`\n'
+		u'`> `/diceroll `- [faces]`\n'
 		u'`\n\nFollow any command with "-?" to get more information`'
 
 		,
@@ -2316,14 +2312,6 @@ def goodnight_message(message):
 			bot.send_message(cid, random.choice(good_night_admin), parse_mode="Markdown")
 		else:
 			bot.send_message(cid, random.choice(good_night), parse_mode="Markdown")
-
-# Chavez message detection
-
-@bot.message_handler(func=lambda message: 'chavez' in message.text.lower() or 'chavistas' in message.text.lower() or 'chavista' in message.text.lower(), content_types=['text'])
-def mchavistas(message):
-	if intime(message):
-		cid = getCID(message)
-		bot.send_message(cid, random.choice(chavez_list), parse_mode="Markdown")
 
 # Answer to beep
 
