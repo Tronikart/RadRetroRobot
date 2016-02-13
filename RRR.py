@@ -183,7 +183,7 @@ def deljson(value, filename):
 def intime(message):
 	timeRange = time.mktime(datetime.datetime.now().timetuple())
 	if int((timeRange - message.date)) < 10:
-		if not hasattr(message, 'forward_from'):
+		if message.forward_from == None:
 			return True
 	else:
 		return False
