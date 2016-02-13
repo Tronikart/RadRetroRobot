@@ -190,24 +190,24 @@ def intime(message):
 
 # keys 
 
-weather_api = "OPENWEATHERMAP API KEY"
-google_img_key = "GOOGLE API KEY"
-lastfm_key = "LASTFM API KEY"
-dota_key = "STEAM API KEY"
-catapi_key = "CATAPI KEY"
-reddit_user = 'REDIT USER AS /u/<user>'
+# weather_api = "OPENWEATHERMAP API KEY"
+# google_img_key = "GOOGLE API KEY"
+# lastfm_key = "LASTFM API KEY"
+# dota_key = "STEAM API KEY"
+# catapi_key = "CATAPI KEY"
+# reddit_user = 'REDIT USER AS /u/<user>'
 
 # tweepy stuff
 
-consumer_key = 'TWITTER CONSUMER KEY'
-consumer_secret = 'TWITTER CONSUMER SECRET KEY'
-access_token = 'TWITTER ACCESS TOKEN'
-access_secret = 'TWITTER ACCESS SECRET'
+# consumer_key = 'TWITTER CONSUMER KEY'
+# consumer_secret = 'TWITTER CONSUMER SECRET KEY'
+# access_token = 'TWITTER ACCESS TOKEN'
+# access_secret = 'TWITTER ACCESS SECRET'
  
-auth = OAuthHandler(consumer_key, consumer_secret)
-auth.set_access_token(access_token, access_secret)
+# auth = OAuthHandler(consumer_key, consumer_secret)
+# auth.set_access_token(access_token, access_secret)
  
-api = tweepy.API(auth)
+# api = tweepy.API(auth)
 
 # bot and admin chat id
 
@@ -215,6 +215,10 @@ bot = telebot.TeleBot("BOT API KEY")
 adminid = # Your ID
 botid = # Your Bots ID
 
+try:
+	bot
+except:
+	print "Please set up the bots API key"
 
 """
 #
@@ -978,6 +982,10 @@ def gsearch(message):
 @bot.message_handler(commands=['i', 'insfw', 'image'])
 def isearch(message):
 	if intime(message):
+		try:
+			google_img_key
+		except:
+			print "\n\n\t\tPlease setup google api key\n\n"
 		cid = getCID(message)
 		search = getContent(message)
 		command = getCommand(message)
@@ -1045,6 +1053,10 @@ def ud(message):
 @bot.message_handler(commands=['r'])
 def reddit(message):
 	if intime(message):
+		try:
+			reddit_user
+		except:
+			print "\n\n\t\tPlease setup your reddit user\n\n"
 		cid = getCID(message)
 		isSub = False
 		sub = message.text
@@ -1084,6 +1096,10 @@ def reddit(message):
 @bot.message_handler(func=lambda message: "www.reddit.com/r/" in message.text and "/comments/" in message.text)
 def reddit_selfpost(message):
 	if intime(message):
+		try:
+			reddit_user
+		except:
+			print "\n\n\t\tPlease setup your reddit user\n\n"
 		cid = getCID(message)
 		sub = ""
 		try:
@@ -1157,6 +1173,10 @@ def fmuser(message):
 @bot.message_handler(commands=['np'])
 def nowplaying(message):
 	if intime(message):
+		try:
+			lastfm_key
+		except:
+			print "\n\n\t\tPlease setup lastfm api key\n\n"
 		uid = unicode(message.from_user.id)
 		fmUsers = loadjson("fmuser")
 		isUser = False
@@ -1191,6 +1211,11 @@ def nowplaying(message):
 @bot.message_handler(commands=['fmtop'])
 def top_artist_fm(message):
 	if intime(message):
+		try:
+			lastfm_key
+		except:
+			print "\n\n\t\tPlease setup lastfm api key\n\n"
+
 		cid = unicode(message.chat.id)
 		uid = unicode(message.from_user.id)
 		fmUsers = loadjson("fmuser")
@@ -1234,6 +1259,10 @@ def top_artist_fm(message):
 @bot.message_handler(commands=['fmalbums'])
 def top_album_fm(message):
 	if intime(message):
+		try:
+			lastfm_key
+		except:
+			print "\n\n\t\tPlease setup lastfm api key\n\n"
 		cid = unicode(message.chat.id)
 		uid = unicode(message.from_user.id)
 		fmUsers = loadjson("fmuser")
@@ -1349,6 +1378,10 @@ def dota_news(message):
 @bot.message_handler(commands=['dotaleague', 'dleague', 'dtournament', 'dotatournament'])
 def dota_league_info(message):
 	if intime(message):
+		try:
+			dota_key
+		except:
+			print "\n\n\t\tPlease setup dota api key\n\n"
 		cid = getCID(message)
 		league_id = getContent(message)
 		url = "http://api.steampowered.com/IDOTA2Match_570/GetLeagueListing/v1/?key=" + dota_key + "&format=JSON&language=en_us"
@@ -1379,6 +1412,10 @@ def dota_league_info(message):
 @bot.message_handler(commands=['dotalive', 'dlive'])
 def dota_leagues(message):
 	if intime(message):
+		try:
+			dota_key
+		except:
+			print "\n\n\t\tPlease setup dota api key\n\n"
 		cid = getCID(message)
 		content = getContent(message)
 		url = "http://api.steampowered.com/IDOTA2Match_570/GetLiveLeagueGames/v1/?key=" + dota_key + "&format=JSON&language=en_us"
@@ -1461,6 +1498,10 @@ def dota_leagues(message):
 @bot.message_handler(commands=['dotalivedetails', 'dldetails'])
 def dota_league_detail(message):
 	if intime(message):
+		try:
+			dota_key
+		except:
+			print "\n\n\t\tPlease setup dota api key\n\n"
 		cid = getCID(message)
 		url = "http://api.steampowered.com/IDOTA2Match_570/GetLiveLeagueGames/v1/?key=" + dota_key + "&format=JSON&language=en_us"
 		hero_list = getJson("http://api.steampowered.com/IEconDOTA2_570/GetHeroes/v1/?key=" + dota_key + "&format=JSON&language=en_us")
@@ -1605,6 +1646,10 @@ def dota_league_detail(message):
 @bot.message_handler(commands=['dotalivemap', 'dlmap'])
 def dota_map(message):
 	if intime(message):
+		try:
+			dota_key
+		except:
+			print "\n\n\t\tPlease setup dota api key\n\n"
 		cid = getCID(message)
 		content = getContent(message)
 		if content and content != "-?":
@@ -1670,6 +1715,10 @@ def dota_map(message):
 @bot.message_handler(commands=['dotamatch', 'dmatch'])
 def dota_match(message):
 	if intime(message):
+		try:
+			dota_key
+		except:
+			print "\n\n\t\tPlease setup dota api key\n\n"
 		cid = getCID(message)
 		match_id = getContent(message)
 		if match_id and match_id != "-?":
@@ -1794,6 +1843,10 @@ def steam_news(message):
 @bot.message_handler(commands=['steamid'])
 def steam_id(message):
 	if intime(message):
+		try:
+			dota_key
+		except:
+			print "\n\n\t\tPlease setup dota api key\n\n"
 		name = getContent(message)
 		if name and name != "-?":
 			name = unicode(name)
@@ -1999,6 +2052,10 @@ def lyrics(message):
 @bot.message_handler(commands=['weather'])
 def weather_command(message):
 	if intime(message):
+		try:
+			weather_api
+		except:
+			"\n\n\t\tPlease setup weather api key\n\n"
 		city = getContent(message)
 		cid = getCID(message)
 		if city and city != "-?":
@@ -2142,6 +2199,10 @@ def imdb_message(message):
 @bot.message_handler(commands=['tw'])
 def tweetadm(message):
 	tweet = getContent(message)
+	try:
+		api
+	except:
+		print "\n\n\t\tPlease setup your tweepy api key\n\n"
 	if message.from_user.id == adminid:
 		if len(tweet) <= 140:
 			api.update_status(unicode(tweet))
@@ -2156,33 +2217,41 @@ def tweetadm(message):
 @bot.message_handler(func=lambda message: "twitter.com" in message.text and "/status/" in message.text)
 def tweepy_f(message):
 	if intime(message):
-		tweets= ""
-		tweet_id = re.findall(r'/status/+(\d*)', unicode(message.text))
 		try:
-			status = api.get_status(tweet_id[0])
-			tweet = status.text
-			favs = str(status.favorite_count)
-			RTs = str(status.retweet_count)
-			user = status.user.screen_name
-			username = status.user.name
-		except:
-			pass
-		try:
+			api
+			tweets= ""
+			tweet_id = re.findall(r'/status/+(\d*)', unicode(message.text))
 			try:
-				quoted_tweet = status.quoted_status["text"]
-				quoted_user = status.quoted_status["user"]["screen_name"]
-				quoted_username = status.quoted_status["user"]["name"]
-				bot.reply_to(message, u"`_______quoted tweet_______\n  > Tweet from {quoted_username}({quoted_user})`\n".format(quoted_username=quoted_username, quoted_user=quoted_user) + u"{quoted_tweet}".format(quoted_tweet=quoted_tweet) + "`\n_____end of quoted tweet_____`\n\n`RTs:{RTs} | Likes: {favs}\n`".format(RTs=RTs, favs=favs), parse_mode="Markdown")	
+				status = api.get_status(tweet_id[0])
+				tweet = status.text
+				favs = str(status.favorite_count)
+				RTs = str(status.retweet_count)
+				user = status.user.screen_name
+				username = status.user.name
 			except:
-				bot.reply_to(message, u"`> Tweet from {username}(@{user}):`".format(user=user, username=username) + "\n`RTs:{RTs} | Likes: {favs}\n`".format(RTs=RTs, favs=favs), parse_mode="Markdown", disable_web_page_preview=True)
+				pass
+			try:
+				try:
+					quoted_tweet = status.quoted_status["text"]
+					quoted_user = status.quoted_status["user"]["screen_name"]
+					quoted_username = status.quoted_status["user"]["name"]
+					bot.reply_to(message, u"`_______quoted tweet_______\n  > Tweet from {quoted_username}({quoted_user})`\n".format(quoted_username=quoted_username, quoted_user=quoted_user) + u"{quoted_tweet}".format(quoted_tweet=quoted_tweet) + "`\n_____end of quoted tweet_____`\n\n`RTs:{RTs} | Likes: {favs}\n`".format(RTs=RTs, favs=favs), parse_mode="Markdown")	
+				except:
+					bot.reply_to(message, u"`> Tweet from {username}(@{user}):`".format(user=user, username=username) + "\n`RTs:{RTs} | Likes: {favs}\n`".format(RTs=RTs, favs=favs), parse_mode="Markdown", disable_web_page_preview=True)
+			except:
+				pass
 		except:
-			pass
+			print "\n\n\t\tPlease setup your tweepy api key\n\n"
 
 # Cat api
 
 @bot.message_handler(commands=['cat'])
 def catapi(message):
 	if intime(message):
+		try:
+			catapi_key
+		except:
+			print "\n\n\t\tPlease setup cat api key\n\n"
 		content = getContent(message)
 		if content != "-?":
 			cid = getCID(message)
