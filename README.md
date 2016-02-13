@@ -13,7 +13,7 @@ Setup your Telegram api key and all the respective keys on RRR.py
 
 Install [eternoir](https://github.com/eternnoir/pyTelegramBotAPI/) Telegram bot api
 
-Run RRR.py using pythong 2.7
+Run RRR.py using python 2.7
 
 ## Required dependencies
 
