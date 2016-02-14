@@ -1146,7 +1146,10 @@ def reddit_selfpost(message):
 def gfy(message):
 	if intime(message):
 		cid = getCID(message)
-		bot.send_message(cid, getGfy(message.text))
+		try:
+			bot.send_message(cid, getGfy(message.text))
+		except:
+			pass
 
 # Last FM User Set
 
@@ -1931,19 +1934,19 @@ def steam_page(message):
 				try:
 					data = request.text
 					soup = BeautifulSoup(data, "html.parser")
-
 					description = soup.findAll('div', class_='game_description_snippet')
 					description = description[0].string
 					description = description.replace("\t","")
-
 					review_points = soup.findAll('span', class_='game_review_summary')
-					review_points = review_points[0].string
-
+					if review_points:
+						review_points = review_points[0].string
+					else:
+						review_points = ""
 					release_date = soup.findAll('span', class_='date')
 					release_date = release_date[0].string
-
 					price = soup.findAll('div', class_="game_purchase_price price")
-					if not price:
+					future_release = soup.findAll('div', class_="game_area_comingsoon game_area_bubble")
+					if not price and not future_release:
 						price = soup.findAll('div', class_="discount_final_price")
 						price = price[0].string
 						price = price.replace("\t","")
@@ -1953,13 +1956,15 @@ def steam_page(message):
 						discounted = discounted.replace("\t","")
 						discounted = discounted.replace("\n","")
 						price = price + " discounted from " + discounted
+					elif not price:
+						price = soup.findAll('div', class_="game_area_comingsoon game_area_bubble")
+						price = price[0].h1.string
+						price = price.replace("\t", "").replace("\n", "")
 					else:
 						price = price[0].string
 						price = price.replace("\t","")
 						price = price.replace("\n","")
-
 					img = soup.find('img', class_='game_header_image_full')['src']
-					
 					title = soup.findAll('div', class_='apphub_AppName')
 					title = title[0].string
 					bot.send_message(cid,u"`> {title} - {price} \n\n {description}\n\nUser reviews: {reviews}\nRelease date: {release_date}`".format(title=title, price=price, description=description, reviews = review_points, release_date=release_date) + u"[​]({image_prev})\n\n [More info]({url})".format(image_prev=img, url=url), parse_mode="Markdown")
@@ -1991,7 +1996,8 @@ def steam_details(message):
 						if detail.text:
 							detlist += "> " + detail.text + "\n"
 					price = soup.findAll('div', class_="game_purchase_price price")
-					if not price:
+					future_release = soup.findAll('div', class_="game_area_comingsoon game_area_bubble")
+					if not price and not future_release:
 						price = soup.findAll('div', class_="discount_final_price")
 						price = price[0].string
 						price = price.replace("\t","")
@@ -2001,6 +2007,10 @@ def steam_details(message):
 						discounted = discounted.replace("\t","")
 						discounted = discounted.replace("\n","")
 						price = price + " discounted from " + discounted
+					elif not price:
+						price = soup.findAll('div', class_="game_area_comingsoon game_area_bubble")
+						price = price[0].h1.string
+						price = price.replace("\t", "").replace("\n", "")
 					else:
 						price = price[0].string
 						price = price.replace("\t","")
