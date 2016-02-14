@@ -2531,6 +2531,8 @@ def welcomeuser(message):
 
 print "Bot: running"
 try:
-	bot.polling(True)
+	bot.polling()
+except KeyboardInterrupt:
+	pass
 except:
 	os.system("py RRR.py")
