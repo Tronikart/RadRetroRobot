@@ -1339,7 +1339,7 @@ def fm_grid(message):
 				if "Error" in soup.text:
 					bot.reply_to(message, "`There has been an error, heres some info:`\n\n" + "`" + soup.text + "`", parse_mode="Markdown")
 				else:
-					bot.send_message(cid, url, parse_mode="Markdown")
+					bot.reply_to(message, url, parse_mode="Markdown")
 		else:
 			bot.reply_to(message, "`This command will return a grid with your last listened albums here are the options you can set\n\n /fmgrid <type> <size>\n\nTypes: 7 day, 1 month, 3 months, 6 months, 12 months, Overall.\nSize: 3x3, 4x4, 5x5\n\nBy default this command will give you a 3x3 grid from last week`", parse_mode="Markdown")
 
@@ -1350,7 +1350,7 @@ def fm_grid(message):
 def last_commands(message):
 	if intime(message):
 		cid = getCID(message)
-		bot.send_message(cid, "`Last FM related commands: \n\n  /fmuser <username> - sets your username for these commands\n  /fmtop - shows your top 5 artists from last week\n  /fmalbums - shows your top 5 albums from last week.\n  /np - shows what you are currently listening to\n  /fmgrid - shows a grid of your last week albums, send /fmgrid ? for more options`", parse_mode="Markdown")
+		bot.send_message(cid, "`Last FM related commands: \n\n  /fmuser <username> - sets your username for these commands\n  /fmtop - shows your top 5 artists from last week\n  /fmalbums - shows your top 5 albums from last week.\n  /np - shows what you are currently listening to\n  /fmgrid - shows a grid of your last week albums,\n  send /fmgrid -? for more options`", parse_mode="Markdown")
 
 # Dota Update
 
@@ -2399,7 +2399,7 @@ def boop(message):
 def boop(message):
 	if intime(message):
 		cid = getCID(message)
-		bot.send_message(cid, '`Boop`', parse_mode="Markdown")
+		bot.send_message(cid, '`Beep`', parse_mode="Markdown")
 
 # Answer to bop
 
