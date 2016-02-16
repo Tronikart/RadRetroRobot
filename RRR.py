@@ -14,7 +14,9 @@ import binascii
 from bs4 import BeautifulSoup
 from tweepy import OAuthHandler
 from telebot import types
+from datetime import datetime
 
+uptime = datetime.datetime.now()
 
 def init_towers(towerstate):
 	towers = []
@@ -46,8 +48,12 @@ def kelv2far(temp):
 def kelv2cels(temp):
 	return temp - 273.15
 
+def from24to12(hour):
+	d = datetime.strptime(hour, "%H:%M:%S")
+	return d.strftime("%I:%M %p")
+
 def unix2date(date):
-	return datetime.datetime.fromtimestamp(int(date)).strftime('%H:%M:%S')
+	return datetime.datetime.fromtimestamp(int(date)).strftime('%H:%M:%S, %A %d, %B %Y')
 
 def dota_bin(number):
 	result = bin(number)
@@ -196,6 +202,7 @@ def intime(message):
 # dota_key = "STEAM API KEY"
 # catapi_key = "CATAPI KEY"
 # reddit_user = 'REDIT USER AS /u/<user>'
+#google_time_key = "GOOGLE TIMEZONE KEY"
 
 # tweepy stuff
 
@@ -420,6 +427,7 @@ text_messages = {
 		u'`>` /dota\n'
 		u'`>` /cat\n'
 		u'`>` /wiki `- <query>`\n'
+		u'`>` /time `- <city>`\n'
 		u'`>` /isdown `- <url>`\n'
 		u'`>` /bin `- <option> <text>`\n'
 		u'`> `/lyrics `- <artist> - <song>`\n'
@@ -534,16 +542,21 @@ def user_list(message):
 	cid = message.from_user.id
 	if cid == adminid:
 		print "\n" + str(len(loadjson("userlist"))) +" users: " 
+		users = str(len(loadjson("userlist")))
 		print loadjson("userlist")
 		print "\n" + str(len(loadjson("fmuser"))) + " lastfm users: "
+		lastfm_users = str(len(loadjson("fmuser")))
 		print loadjson("fmuser")
-		groups = ""
-		for group in loadjson("grouplist").keys():
-			groups += group + " "
-		print "\n" + str(len(loadjson("grouplist"))) + " groups: "
-		print groups
-	else:
-		bot.send_message(cid,'`Access Denied`', parse_mode="Markdown")
+		groups = str(len(loadjson("grouplist")))
+		print groups + " groups"
+		now = datetime.datetime.now()
+		diff = now - uptime
+		days, seconds = diff.days, diff.seconds
+		hours = days * 24 + seconds // 3600
+		minutes = (seconds % 3600) // 60
+		seconds = seconds % 60
+		total_uptime = str(days) + "d " + str(hours) + "h " + str(minutes) + "m " + str(seconds) + "s"
+		bot.send_message(cid,"`" + users + " registered users\n" + lastfm_users + " registered lastfm users\n" + groups + " registered groups\n\nTotal Uptime: " + total_uptime + "`", parse_mode="Markdown")
 
 # Todo list
 
@@ -629,21 +642,17 @@ def prem(message):
 		cid = getCID(message)
 		bot.send_message(cid, text_messages['premade'])
 
-# Destroyed
-
-@bot.message_handler(func=lambda message: "/destroyed" in message.text.lower())
-def prem_destr(message):
-	if intime(message):
-		cid = getCID(message)
-		bot.send_message(cid, premades['destroy'], parse_mode="Markdown")
-
-# Excelente meme
+#	Excelente meme
 
 @bot.message_handler(commands=['ememe'])
 def prem_ememe(message):
 	if intime(message):
 		cid = getCID(message)
-		bot.send_message(cid, premades['ememe'], parse_mode="Markdown")
+		try:
+			rid = message.reply_to_message
+			bot.reply_to(rid, premade['ememe'], parse_mode="Markdown")
+		except:
+			bot.send_message(cid, premades['ememe'], parse_mode="Markdown")
 
 # Nice Meme
 
@@ -651,54 +660,11 @@ def prem_ememe(message):
 def prem_nmeme(message):
 	if intime(message):
 		cid = getCID(message)
-		bot.send_message(cid, premades['nmeme'],parse_mode="Markdown")
-
-# Top kek
-
-@bot.message_handler(func=lambda message: "/top" in message.text.lower())
-def top_kek(message):
-	if intime(message):
-		cid = getCID(message)
-		bot.send_message(cid, random.choice(top_response), parse_mode="Markdown")
-
-# Shrug
-
-@bot.message_handler(func=lambda message: "/shrug" in message.text.lower())
-def shrug(message):
-	cid = getCID(message)
-	if intime(message):
-		cid = getCID(message)
-		bot.send_message(cid, premades['shrug'], parse_mode="Markdown")
-
-# Lenny
-
-@bot.message_handler(func=lambda message: "/lenny" in message.text.lower())
-def lenny(message):
-	if intime(message):
-		cid = getCID(message)
-		bot.send_message(cid, premades['lenny'], parse_mode="Markdown")
-
-# Stare
-
-@bot.message_handler(func=lambda message: "/stare" in message.text.lower())
-def lenny(message):
-	if intime(message):
-		cid = getCID(message)
-		bot.send_message(cid, premades['stare'], parse_mode="Markdown")
-
-# Savage
-
-@bot.message_handler(func=lambda message: "/savage" in message.text.lower() or "/salvaje" in message.text.lower())
-def savage_message(message):
-	if intime(message):
-		cid = getCID(message)
-		message_send = ""
-		rand = random.randrange(6, 20)
-		i = 0
-		while i < rand:
-			message_send += random.choice(savage)
-			i += 1
-		bot.send_message(cid, message_send)
+		try:
+			rid = message.reply_to_message
+			bot.reply_to(rid, premade['nmeme'], parse_mode="Markdown")
+		except:
+			bot.send_message(cid, premades['nmeme'],parse_mode="Markdown")
 
 # Thanks
 
@@ -883,6 +849,48 @@ def calc(message):
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+# Timezone 
+
+@bot.message_handler(commands=['time'])
+def timezone(message):
+	if intime(message):
+		cid = getCID(message)
+		city = getContent(message)
+		if city and city != "-?":
+			now = time.mktime(datetime.now().timetuple())
+			coord_url = "https://maps.googleapis.com/maps/api/geocode/json?address=" + city + "&key=" + google_time_key
+			coord_request = requests.get(coord_url)
+			coord = coord_request.json()
+			if coord_request.status_code == 200:
+				if coord['status'] != "ZERO_RESULTS":
+					coord = coord['results'][0]
+					city_name = coord['address_components'][0]['long_name']
+					country_name = coord['address_components'][3]['short_name']
+					lat = coord['geometry']['location']['lat']
+					lon = coord['geometry']['location']['lng']
+					time_url = "https://maps.googleapis.com/maps/api/timezone/json?location=" + str(lat) + "," + str(lon) + "&timestamp=" + str(now) + "&key=" + google_time_key
+					time_request = requests.get(time_url)
+					time_json = time_request.json()
+					dstOffset = time_json['dstOffset']
+					rawOffset = time_json['rawOffset']
+					timezone = time_json['timeZoneId']
+					timezoneName = time_json['timeZoneName']
+					# This is your local timezone
+					time_offset = 16200
+					time_total = now + dstOffset + rawOffset + time_offset
+					time_total = unix2date(time_total)
+					time_total = time_total.split(',')
+					hours = from24to12(time_total[0])
+					day = time_total[1]
+					month = time_total[2]
+					final_message = "`" + city_name + ", " + country_name + "\n\n" + hours + "\n" + day + ", " + month + "\n\nTimezone: " + timezone + ", " + timezoneName + "`"
+					bot.send_message(cid, final_message, parse_mode="Markdown")
+				else:
+					bot.reply_to(message, "`I couldnt find anything, please try again.`", parse_mode="Markdown")
+			else:
+				bot.reply_to(message, "`There has been an error, the number {error} to be specific.`".format(error=request.status_code), parse_mode="Markdown")
+		else:
+			bot.reply_to(message, "`Follow this command with a city name and I will show you its timezone information`", parse_mode="Markdown")
 
 # Is it down
 
@@ -1058,17 +1066,14 @@ def ud(message):
 @bot.message_handler(commands=['r'])
 def reddit(message):
 	if intime(message):
-		try:
-			reddit_user
-		except:
-			print "\n\n\t\tPlease setup your reddit user\n\n"
 		cid = getCID(message)
 		isSub = False
 		sub = message.text
 		sub = getContent(message)
+		sub = re.findall(r'/*r*\s*(\S*)', sub)
+		sub = "r/" + sub[0]
+		print sub
 		if sub != "-?" and sub:
-			if sub[0:2] != 'r/':
-				sub = 'r/' + sub
 			url = "http://www.reddit.com/" + sub + "/.json?limit=6"
 			subreddit =  "http://www.reddit.com/" + sub
 			request = requests.get(url, headers = {'User-agent': reddit_user})
@@ -1091,10 +1096,12 @@ def reddit(message):
 					bot.send_message(cid, u"[{sub}]({subreddit})`:`\n\n".format(sub=sub, subreddit=subreddit) + posts, parse_mode="Markdown", disable_web_page_preview=True)
 				else:
 					bot.send_message(cid, u"`I couldnt find {sub}, please try again`".format(sub=sub), parse_mode="Markdown",disable_web_page_preview=True)
+			elif request.status_code == 403:
+				bot.reply_to(message, "`Subreddit not found, please verify your input.`", parse_mode="Markdown")
 			else:
 				bot.reply_to(message, "`There has been an error, the number {error} to be specific.`".format(error=request.status_code), parse_mode="Markdown")
 		else:
-			bot.send_message(cid, "`Follow this command with r/ and the name of a subreddit to see the top 4 posts.`", parse_mode="Markdown")
+			bot.send_message(cid, "`Follow this command with r/ and the name of a subreddit to see the top 6 posts.\nExample: /r r/Aww`", parse_mode="Markdown")
 
 # Reddit comment thing
 
@@ -1324,30 +1331,34 @@ def fm_grid(message):
 				isUser = True
 			else:
 				bot.reply_to(message, "`Please set your username with /fmuser, preferably from PM.`", parse_mode="Markdown")
-			if isUser:
-				if options:
-					options = re.findall(r'(.*)\s+(\d+x{1}\d+)', options)
-					gridtype = options[0][0].replace(" ", "")
-					gridtype = gridtype.replace("s", "")
-					gridsize = options[0][1]
-					if gridtype.lower() in validTypes:
-						pass
+			try:
+				if isUser:
+					if options:
+						options = re.findall(r'(.*)\s+(\d+x{1}\d+)', options)
+						gridtype = options[0][0].replace(" ", "")
+						gridtype = gridtype.replace("s", "")
+						gridsize = options[0][1]
+						if gridtype.lower() in validTypes:
+							pass
+						else:
+							gridtype = "7day"
+						if gridsize.lower() in validSizes:
+							pass
+						else:
+							gridsize = "3x3"
 					else:
 						gridtype = "7day"
-					if gridsize.lower() in validSizes:
-						pass
-					else:
 						gridsize = "3x3"
-				else:
-					gridtype = "7day"
-					gridsize = "3x3"
-				url = "http://www.tapmusic.net/collage.php?type=" + gridtype + "&size=" + gridsize + "&user=" + fmUsers[uid]
-				request = requests.get(url)
-				soup = BeautifulSoup(request.text, "html.parser")
-				if "Error" in soup.text:
-					bot.reply_to(message, "`There has been an error, heres some info:`\n\n" + "`" + soup.text + "`", parse_mode="Markdown")
-				else:
-					bot.reply_to(message, url, parse_mode="Markdown")
+					url = "http://www.tapmusic.net/collage.php?type=" + gridtype + "&size=" + gridsize + "&user=" + fmUsers[uid]
+					print url
+					request = requests.get(url)
+					soup = BeautifulSoup(request.text, "html.parser")
+					if "Error" in soup.text:
+						bot.reply_to(message, "`There has been an error, heres some info:`\n\n" + "`" + soup.text + "`", parse_mode="Markdown")
+					else:
+						bot.reply_to(message, url)
+			except:
+				bot.reply_to(message, "`Something went wrong, sorry try again later.`", parse_mode="Markdown")
 		else:
 			bot.reply_to(message, "`This command will return a grid with your last listened albums here are the options you can set\n\n /fmgrid <type> <size>\n\nTypes: 7 day, 1 month, 3 months, 6 months, 12 months, Overall.\nSize: 3x3, 4x4, 5x5\n\nBy default this command will give you a 3x3 grid from last week`", parse_mode="Markdown")
 
@@ -2483,6 +2494,93 @@ def mention(message):
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+#	Destroyed
+
+@bot.message_handler(func=lambda message: "/destroyed" in message.text.lower())
+def prem_destr(message):
+	if intime(message):
+		cid = getCID(message)
+		try:
+			rid = message.reply_to_message
+			bot.reply_to(rid, premade['destroy'], parse_mode="Markdown")
+		except:	
+			bot.send_message(cid, premades['destroy'], parse_mode="Markdown")
+
+# Top kek
+
+@bot.message_handler(func=lambda message: "/top" in message.text.lower())
+def top_kek(message):
+	if intime(message):
+		cid = getCID(message)
+		if not cid == degeneratesgroup:
+			try:
+				rid = message.reply_to_message
+				bot.reply_to(rid, random.choice(top_response), parse_mode="Markdown")
+			except:
+				bot.send_message(cid, random.choice(top_response), parse_mode="Markdown")
+		else:
+			try:
+				rid = message.reply_to_message
+				bot.reply_to(rid, random.choice(top_response_degen), parse_mode="Markdown")
+			except:
+				bot.send_message(cid, random.choice(top_response_degen), parse_mode="Markdown")
+
+# Shrug
+
+@bot.message_handler(func=lambda message: "/shrug" in message.text.lower())
+def shrug(message):
+	cid = getCID(message)
+	if intime(message):
+		if not cid == degeneratesgroup:
+			cid = getCID(message)
+			try:
+				rid = message.reply_to_message
+				bot.reply_to(rid, premades['shrug'], parse_mode="Markdown")
+			except:
+				bot.send_message(cid, premades['shrug'], parse_mode="Markdown")
+
+
+# Lenny
+
+@bot.message_handler(func=lambda message: "/lenny" in message.text.lower())
+def lenny(message):
+	if intime(message):
+		cid = getCID(message)
+		try:
+			rid = message.reply_to_message
+			bot.reply_to(rid, premades['lenny'], parse_mode="Markdown")
+		except:
+			bot.send_message(cid, premades['lenny'], parse_mode="Markdown")
+
+# Stare
+
+@bot.message_handler(func=lambda message: "/stare" in message.text.lower())
+def lenny(message):
+	if intime(message):
+		cid = getCID(message)
+		try:
+			rid = message.reply_to_message
+			bot.reply_to(rid, premades['stare'], parse_mode="Markdown")
+		except:
+			bot.send_message(cid, premades['stare'], parse_mode="Markdown")
+
+# Savage
+
+@bot.message_handler(func=lambda message: "/savage" in message.text.lower() or "/salvaje" in message.text.lower())
+def savage_message(message):
+	if intime(message):
+		cid = getCID(message)
+		message_send = ""
+		rand = random.randrange(6, 20)
+		i = 0
+		while i < rand:
+			message_send += random.choice(savage)
+			i += 1
+		try:
+			rid = message.reply_to_message
+			bot.reply_to(rid, message_send)
+		except:
+			bot.send_message(cid, message_send)
 
 # Random repeats stuff
 # Beeps and boops
@@ -2540,4 +2638,6 @@ try:
 except KeyboardInterrupt:
 	pass
 except:
+	print "\nUnexpected error:", sys.exc_info()[0]
+	print "\n\t"+str(sys.exc_info()[1]) + "\n"
 	os.system("py RRR.py")
