@@ -23,6 +23,8 @@ sortedcontainers
 
 BeautifulSoup
 
+wikipedia
+
 ## Plugins
 
 |Plugin | Brief explanation|
