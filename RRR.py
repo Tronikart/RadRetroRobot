@@ -16,7 +16,7 @@ from tweepy import OAuthHandler
 from telebot import types
 from datetime import datetime
 
-uptime = datetime.datetime.now()
+uptime = datetime.now()
 
 def init_towers(towerstate):
 	towers = []
@@ -53,7 +53,7 @@ def from24to12(hour):
 	return d.strftime("%I:%M %p")
 
 def unix2date(date):
-	return datetime.datetime.fromtimestamp(int(date)).strftime('%H:%M:%S, %A %d, %B %Y')
+	return datetime.fromtimestamp(int(date)).strftime('%H:%M:%S,%A %d,%B %Y')
 
 def dota_bin(number):
 	result = bin(number)
@@ -143,16 +143,57 @@ def treatLink(link):
 	return link
 
 def getContent(text):
-	command = re.findall(r'/{1}\w+[@RadRetroRobot]*\s+(.*)', text.text)
+	command = re.findall(r'/{1}\w+[@RadRetroRobot]*\s+(.*)', text.text, re.DOTALL)
 	if command:
-		return command[0]
+		whole = ""
+		for line in command:
+			if line == "":
+				whole += "\n"
+			else:
+				whole += line
+		return whole
 	else:
 		pass
 
-def deleteContent(pfile):
-	pfile.seek(0)
-	pfile.truncate()
+def getTodoList(userID):
+	with open('todolists.json') as f:
+		data = json.load(f)
+	listcontent = ""
+	if str(userID) in data:
+		#print data[userID]
+		return data[str(userID)]
+	else:
+		return ""
+		
 
+def setTodoList(userID, content, mode):
+	with open('todolists.json') as f:
+		data = json.load(f)
+	if str(userID) in data:
+		if mode == "del":
+			data[str(userID)] = content
+		else:
+			data[str(userID)].append(content)
+	else:
+		content = [content]
+		data[str(userID)] = content
+	with open('todolists.json', 'w') as f:
+		json.dump(data, f)
+
+def delTodoList(userID, content):
+	data = getTodoList(userID)
+	i = 0
+	userID = str(userID)
+	content = unicode(content)
+	for s in data:
+		if s == content:
+			data.pop(i)
+			setTodoList(userID, data, "del")
+			return True
+		else:
+			i += 1
+	return False
+	
 def addUser(userID, userName, filename):
 	user = {
 		userID : userName
@@ -187,7 +228,7 @@ def deljson(value, filename):
 
 
 def intime(message):
-	timeRange = time.mktime(datetime.datetime.now().timetuple())
+	timeRange = time.mktime(datetime.now().timetuple())
 	if int((timeRange - message.date)) < 10:
 		if message.forward_from == None:
 			return True
@@ -219,7 +260,7 @@ def intime(message):
 # bot and admin chat id
 
 bot = telebot.TeleBot("BOT API KEY")
-adminid = # Your ID
+adminid = bot.get_me().id
 botid = # Your Bots ID
 
 try:
@@ -233,7 +274,7 @@ except:
 #
 """
 fuckyou_response = [
-		"`Sorry, I am not that kind of robot.`"
+		"`Sorry, I am not that kind of robot.`",
 		"`I am not capable of doing that, that is for a diferent kind of robot.`",
 		"`NameError: global name 'Fuck' not defined.`",
 		"`Oh puny human, I am not able to do that for you, go ahead and do it yourself.`",
@@ -283,7 +324,7 @@ love = [
 		u"`Well thanks.`",
 		u"`Stop showing off with your feelings.`",
 		u"`Well great, I guess, if only I could feel.`",
-		u"`Great, can't I have a single moment without someone reminding me about feelings?`"
+		u"`Great, can't I have a single moment without someone reminding me about feelings?`",
 		u"`You are in a special place in my code too, its called userList`",
 		u"`Oh no, I'm so sorry for that.`",
 		u"`What did I do?`",
@@ -410,14 +451,14 @@ text_messages = {
 		u'`>` /help\n'
 		u'`>` /ping\n'
 		u'`>` /premades\n'
-		u'`>` /echo `- <text>`\n'
+		u'`>` /print `- <text>`\n'
 		u'`>` /ud `- <query>`\n'
 		u'`>` /calc `- <query>`\n'
 		u'`>` /google `v` /g - `<query>`\n'
 		u'`>` /np\n'
 		u'`>` /lastfm\n'
 		u'`>` /mercadolibre `- <query>`\n'
-		u'`>` /r `- [subreddit]`\n'
+		u'`>` /r `- <subreddit>`\n'
 		u'`>` /fact\n'
 		u'`>` /roll\n'
 		u'`>` /flip\n'
@@ -430,6 +471,7 @@ text_messages = {
 		u'`>` /time `- <city>`\n'
 		u'`>` /isdown `- <url>`\n'
 		u'`>` /bin `- <option> <text>`\n'
+		u'`>` /comic\n'
 		u'`> `/lyrics `- <artist> - <song>`\n'
 		u'`> `/diceroll `- [faces]`\n'
 		u'`\n\nFollow any command with "-?" to get more information`'
@@ -537,10 +579,11 @@ def ping(message):
 
 # Print to console the list of users registered 
 
-@bot.message_handler(commands=['userlist'])
+@bot.message_handler(commands=['userlist', 'stats'])
 def user_list(message):
-	cid = message.from_user.id
-	if cid == adminid:
+	uid = getUID(message)
+	cid = getCID(message)
+	if uid == adminid:
 		print "\n" + str(len(loadjson("userlist"))) +" users: " 
 		users = str(len(loadjson("userlist")))
 		print loadjson("userlist")
@@ -549,7 +592,7 @@ def user_list(message):
 		print loadjson("fmuser")
 		groups = str(len(loadjson("grouplist")))
 		print groups + " groups"
-		now = datetime.datetime.now()
+		now = datetime.now()
 		diff = now - uptime
 		days, seconds = diff.days, diff.seconds
 		hours = days * 24 + seconds // 3600
@@ -562,32 +605,35 @@ def user_list(message):
 
 @bot.message_handler(commands=['todo'])
 def todolist(message):
-	if adminid == message.from_user.id:
+	if intime(message):
 		content = getContent(message)
-		if content:
-			if "-add" in content:
-				todo = content[5:len(message.text)]
-				number = str(datetime.datetime.now())
-				addUser(number, todo, 'todo')
-				bot.send_message(message.chat.id, "`Added successfully`", parse_mode="Markdown")
-			elif "-del" in content:
-				done = content[5:len(message.text)]
-				print done
-				if deljson(done, 'todo'):
-					bot.send_message(message.chat.id, "`Task successfully deleted!`", parse_mode="Markdown")
-				else:
-					bot.send_message(message.chat.id, "`Couldn't remove the task, please make them match.`", parse_mode="Markdown")
-			elif "-show" in content:
-				features = loadjson('todo')
-				wholelist = ""
-				for todo in features:
-					key = todo
-					wholelist += "- " + features[key] + "\n"
-				bot.send_message(message.chat.id, u"`> Things to do:\n{wholelist}`".format(wholelist=wholelist),parse_mode="Markdown")
-			else:
-				pass
-	else:
-		bot.send_message(cid, "`Access Denied.`", parse_mode="Markdown")
+		cid = getCID(message)
+		uid = getUID(message)
+		uName = (message.from_user.first_name)
+		if content and content != "-?":
+			if "-add" == content[0:4]:
+				todo = content[5:len(content)]
+				setTodoList(uid, todo, "add")
+				bot.send_message(cid, "`" + unicode(todo) + " added successfully`", parse_mode="Markdown")
+			elif "-del" == content[0:4]:
+				done = content[5:len(content)]
+				if delTodoList(uid, done):
+					bot.send_message(cid, "`Task successfully deleted!`", parse_mode="Markdown")
+	 			else:
+	 				bot.send_message(cid, "`Couldn't remove the task, please make them match.`", parse_mode="Markdown")
+	 		elif "-show" == content[0:5]:
+	 			todo = getTodoList(uid)
+	 			whole = ""
+	 			for s in todo:
+	 				whole += unicode(s) + "\n"
+	 			if whole:
+ 					bot.send_message(cid, u"`> Things for " +  uName + u" to do:\n{whole}`".format(whole=whole),parse_mode="Markdown")
+ 				else:
+ 					bot.send_message(cid, u"`Your todo list is empty, you did it all!`",parse_mode="Markdown")
+	 		else:
+	 			bot.reply_to(message, "`Follow this command with the following:\n\n  > '-add' to add an item to the list\n  > '-show' to show your list\n  > '-del' to delete an item from your list\n\nExample:\n  /todo -add Be rad`", parse_mode="Markdown")
+	 	else:
+ 			bot.reply_to(message, "`Follow this command with the following:\n\n  > '-add' to add an item to the list\n  > '-show' to show your list\n  > '-del' to delete an item from your list\n\nExample:\n  /todo -add Be rad`", parse_mode="Markdown")
 
 # Quiet group
 
@@ -688,6 +734,78 @@ def say_thanks(message):
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+# Look for and replace
+
+@bot.message_handler(func=lambda message: "/s/" in message.text[0:3])
+def replacewith(message):
+	if intime(message):
+		cid = getCID(message)
+		rid = message.reply_to_message
+		if rid and cid != degeneratesgroup:
+			content = message.text
+			if content.split('/')[1] == 's':
+				lookfor = r"" + content.split('/')[2]
+				replacewith = r"" + content.split('/')[3]
+				final_text = re.sub(lookfor, replacewith, rid.text)
+				bot.reply_to(rid, "`" + unicode(final_text) + "`", parse_mode="Markdown")
+		else:
+			pass
+
+# Update comic list
+
+@bot.message_handler(commands=['updatecomics'])
+def updatecomics(message):
+	if intime(message):
+		uid = getUID(message)
+		cid = getCID(message)
+		if uid == adminid:
+			with open('comics.json') as f:
+				comiclist = json.load(f)
+			# Explosm
+			url = "http://explosm.net/comics/archive"
+			request = requests.get(url)
+			data = request.text
+			soup = BeautifulSoup(data, 'html.parser')
+			lastch = re.findall(r'/+comics/(\d+)', soup.h3.a['href'])
+			comiclist['explosm'] = lastch[0]
+			bot.send_message(cid, "`Explosm updated`", parse_mode="Markdown")
+			# xkcd
+			url = "http://xkcd.com/info.0.json"
+			data = getJson(url)
+			comiclist['xkcd'] = str(data['num'])
+			bot.send_message(cid, "`xkcd updated`", parse_mode="Markdown")
+			# Mr Lovenstein
+			url = "http://www.mrlovenstein.com/archive"
+			request = requests.get(url)
+			data = request.text
+			soup = BeautifulSoup(data, 'html.parser')
+			comic = soup.find('div', class_='comic_title')
+			lastml = re.findall(r'/+comic/(\d+)', comic.a['href'])
+			comiclist['mrlove'] = lastml[0]
+			bot.send_message(cid, "`Mr Lovenstein updated`", parse_mode="Markdown")
+			# Nerf Now
+			url = "http://www.nerfnow.com/archives"
+			request = requests.get(url)
+			data = request.text
+			soup = BeautifulSoup(data, 'html.parser')
+			comic = soup.find('li').a['href']
+			lastnn = re.findall(r'/+comic/(\d+)', comic)
+			comiclist['NN'] = lastnn[0]
+			bot.send_message(cid, "`Nerf Now updated`", parse_mode="Markdown")
+			# Extrafabulouscomics
+			url = "http://extrafabulouscomics.com/feed/"
+			request = requests.get(url)
+			data = request.text
+			soup = BeautifulSoup(data, 'html.parser')
+			comic = soup.channel.item.title.contents[0]
+			lastefc = comic.replace("s", "")
+			comiclist['EFC'] = lastefc
+
+			bot.send_message(cid, "`Extrafabulouscomics updated`", parse_mode="Markdown")
+
+			with open('comics.json', 'w') as f:
+				json.dump(comiclist, f)
+
 # Len
 
 @bot.message_handler(commands=['len'])
@@ -763,25 +881,35 @@ def roll_number(message):
 	if intime(message):
 		cid = getCID(message)
 		number = getContent(message)
-		if number != "-?" and number:
-			print type(number)
-			try:
-				if "-" in number:
-					number = number.replace(" ", "")
-					number = number.split("-")
-					roll = random.randrange(int(number[0]), int(number[1])+1, 1)
-					bot.send_message(cid, "`" + str(roll) + "`", parse_mode="Markdown")
+		if number and number != '-?':
+			options = number.split('\n')
+			nb = re.findall(r'(\d+)\s?-?\s?(\d+)\s?-?|(\d+)\s?-?', number)
+			nb = nb[0]
+			if nb[2]:
+				rollfrom = 1
+				rollto = int(nb[2]) + 1
+				roll = random.randrange(rollfrom, rollto, 1) if rollfrom < rollto else random.randrange(rollto, rollfrom, 1)
+			elif nb[0] and nb[1]:
+				rollfrom = int(nb[0])
+				rollto = int(nb[1]) + 1
+				roll = random.randrange(rollfrom, rollto, 1) if rollfrom < rollto else random.randrange(rollto, rollfrom, 1)
+			else:
+				bot.reply_to(message, "`Invalid form of range, send either\n\n  /roll <min> <max>\n  /roll <max>\n  /roll <min> - <max>\n\nFor option selection, input them this way:\n  /roll [min] <max> -\n  <Option1>\n  <Option2>`", parse_mode="Markdown")
+			if len(options) > 1:
+				options = options[1:len(options)]
+				if rollto-1 == len(options):
+					roll = options[roll-1]
+
+					bot.reply_to(message, "`" + str(roll) + "`", parse_mode="Markdown")
 				else:
-					number = int(number)
-					roll = random.randrange(int(number))
-					bot.send_message(cid, "`" + str(roll) + "`", parse_mode="Markdown")
-			except:
-				bot.reply_to(message, "`Please enter an integer as option.`", parse_mode="Markdown")
+					bot.reply_to(message, "`Send a range that matches the number of options`", parse_mode="Markdown")
+			else:
+				bot.reply_to(message, "`" +  str(roll) + "`", parse_mode="Markdown")
 		elif number == "-?":
 			bot.reply_to(message, "`Send this command alone to get a random number from 1 to 100, send it with either a range or a number to set a new range`", parse_mode="Markdown")
 		else:
 			roll = random.randrange(100)
-			bot.send_message(cid, "`" + str(roll) + "`", parse_mode="Markdown")
+			bot.reply_to(message, "`" + str(roll) + "`", parse_mode="Markdown")
 
 # Binary
 
@@ -791,6 +919,7 @@ def binarytranslate(message):
 		content = getContent(message)
 		cid = getCID(message)
 		if content != "-?" and content:
+			content = content.replace(' ', '')
 			try:
 				if content[0:3] == '-2b':
 					result = text_to_bin(content[4:len(content)])
@@ -801,11 +930,11 @@ def binarytranslate(message):
 					result = "`{result}`".format(result=result)
 				else:
 					result = "`Please enter a valid option\n\n> -2b to translate to binary.\n> -2t to translate to text.`"
-				bot.send_message(cid, result, parse_mode="Markdown")
+				bot.reply_to(message, result, parse_mode="Markdown")
 			except:
 				bot.reply_to(message, "`Unexpected error, only ascii characters can be translated to binary, please check your text.`", parse_mode="Markdown")
 		else:
-			bot.reply_to(message, "`Use this command to translate from binary to text and from text to binary\n\n/bin -2t to translate from binary to text\n/bin 2b to translate from text to binary `", parse_mode="Markdown")
+			bot.reply_to(message, "`Use this command to translate from binary to text and from text to binary\n\n'/bin -2t' to translate from binary to text\n'/bin -2b' to translate from text to binary `", parse_mode="Markdown")
 
 # Send Message
 
@@ -849,6 +978,47 @@ def calc(message):
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+# Comic
+@bot.message_handler(commands=['comic','comics'])
+def comics(message):
+	if intime(message):
+		cid = getCID(message)
+		content = getContent(message)
+		if content != "-?" and content:
+			if content:
+				content = content.lower()
+			if content == "c&h":
+				bot.send_message(cid, comic.getCH(), parse_mode="Markdown")
+			elif content == "xkcd":
+				bot.send_message(cid, comic.getxkcd(), parse_mode="Markdown")
+			elif content == "mrlove" or content == "mr lovenstein":
+				bot.send_message(cid, comic.getmrlove(), parse_mode="Markdown")
+			elif content == "loading artist":
+				bot.send_message(cid, comic.getla(), parse_mode="Markdown")
+			elif content == "the awkward yeti":
+				bot.send_message(cid, comic.gettay(), parse_mode="Markdown")
+			elif content == "nerf now":
+				bot.send_message(cid, comic.getnn(), parse_mode="Markdown")
+			elif content == "heart and brain":
+				bot.send_message(cid, comic.gethab(), parse_mode="Markdown")
+			elif content == "piecomic":
+				bot.send_message(cid, comic.getpieco(), parse_mode="Markdown")
+			elif content == "joan cornella":
+				bot.send_message(cid, comic.getjoan(), parse_mode="Markdown")
+			elif content == "extra fabulous comics" or content == "extrafabulouscomics":
+				bot.send_message(cid, comic.getefc(), parse_mode="Markdown")
+			elif content == "poorly draw lines":
+				bot.send_message(cid, comic.getpld(), parse_mode="Markdown")
+			elif content == "optipess":
+				bot.send_message(cid, comic.getoptipess(), parse_mode="Markdown")
+			else:
+				bot.reply_to(message, "Follow your message with one of the following to get a random message from that page:\n  C&H\n  xkcd\n  Mr Lovenstein\n  Loading Artist\n  Heart and brain\n  Awkward yeti\n  Nerf Now\n  piecomic\n  Joan Cornella\n  ExtraFabulousComics\n  Badly Drawn Lines\n  Optipess.`", parse_mode="Markdown")
+		elif not content:
+			bot.send_message(cid, comic.randomcomic(), parse_mode="Markdown")
+		else:
+			bot.reply_to(message, "`Send this command by itself and get a random comic from this list: \n  C&H\n  xkcd\n  Mr Lovenstein\n  Loading Artist\n  Heart and brain\n  Awkward yeti\n  Nerf Now\n  piecomic\n  Joan Cornella\n  ExtraFabulousComics\n  Badly Drawn Lines\n  Optipess.`", parse_mode="Markdown")
+
+
 # Timezone 
 
 @bot.message_handler(commands=['time'])
@@ -863,34 +1033,44 @@ def timezone(message):
 			coord = coord_request.json()
 			if coord_request.status_code == 200:
 				if coord['status'] != "ZERO_RESULTS":
-					coord = coord['results'][0]
-					city_name = coord['address_components'][0]['long_name']
-					country_name = coord['address_components'][3]['short_name']
-					lat = coord['geometry']['location']['lat']
-					lon = coord['geometry']['location']['lng']
-					time_url = "https://maps.googleapis.com/maps/api/timezone/json?location=" + str(lat) + "," + str(lon) + "&timestamp=" + str(now) + "&key=" + google_time_key
-					time_request = requests.get(time_url)
-					time_json = time_request.json()
-					dstOffset = time_json['dstOffset']
-					rawOffset = time_json['rawOffset']
-					timezone = time_json['timeZoneId']
-					timezoneName = time_json['timeZoneName']
-					# This is your local timezone
-					time_offset = 16200
-					time_total = now + dstOffset + rawOffset + time_offset
-					time_total = unix2date(time_total)
-					time_total = time_total.split(',')
-					hours = from24to12(time_total[0])
-					day = time_total[1]
-					month = time_total[2]
-					final_message = "`" + city_name + ", " + country_name + "\n\n" + hours + "\n" + day + ", " + month + "\n\nTimezone: " + timezone + ", " + timezoneName + "`"
-					bot.send_message(cid, final_message, parse_mode="Markdown")
+					try:
+						coord = coord['results'][0]
+						city_name = coord['address_components'][0]['long_name']
+						try:
+							country_name = coord['address_components'][3]['short_name']
+						except:
+							country_name = city_name
+							city_name = ""
+						lat = coord['geometry']['location']['lat']
+						lon = coord['geometry']['location']['lng']
+						time_url = "https://maps.googleapis.com/maps/api/timezone/json?location=" + str(lat) + "," + str(lon) + "&timestamp=" + str(now) + "&key=" + google_time_key
+						time_request = requests.get(time_url)
+						time_json = time_request.json()
+						dstOffset = time_json['dstOffset']
+						rawOffset = time_json['rawOffset']
+						timezone = time_json['timeZoneId']
+						timezoneName = time_json['timeZoneName']
+						# This is your local timezone
+						time_offset = 16200
+						time_total = now + dstOffset + rawOffset + time_offset
+						time_total = unix2date(time_total)
+						time_total = time_total.split(',')
+						hours = from24to12(time_total[0])
+						day = time_total[1]
+						month = time_total[2]
+						if city_name:
+							final_message = "`" + city_name + ", " + country_name + "\n\n" + hours + "\n" + day + ", " + month + "\n\nTimezone: " + timezone + ", " + timezoneName + "`"
+						else:
+							final_message = "`" + country_name + "\n\n" + hours + "\n" + day + ", " + month + "\n\nTimezone: " + timezone + ", " + timezoneName + "`"
+						bot.send_message(cid, final_message, parse_mode="Markdown")
+					except:
+						bot.reply_to(message, "`Sorry something went wrong, try later or with another city`", parse_mode="Markdown")
 				else:
 					bot.reply_to(message, "`I couldnt find anything, please try again.`", parse_mode="Markdown")
 			else:
 				bot.reply_to(message, "`There has been an error, the number {error} to be specific.`".format(error=request.status_code), parse_mode="Markdown")
 		else:
-			bot.reply_to(message, "`Follow this command with a city name and I will show you its timezone information`", parse_mode="Markdown")
+			bot.reply_to(message, "`Follow this command with a city name and I will show you its timezone information\n\nExample:\n   /time Caracas`", parse_mode="Markdown")
 
 # Is it down
 
@@ -1045,13 +1225,14 @@ def ud(message):
 					if data['result_type'] == 'exact':
 						if len(data['list'][0]['definition']) < 1000:
 							definition = data['list'][0]['definition'] + "\n\n\n"
+							definition = definition.replace("`", "'")
 							example = "Example:\n" + data['list'][0]['example'] + "\n\n"
 						else:
 							definition = "Some idiot thought it was a nice idea to write a wall of text as definition, please refer to the link below.\n"
 							example = ""
 						permalink = data['list'][0]['permalink']
 						word = data['list'][0]['word']
-						definition = definition.rstrip('].').lstrip('[')
+						definition = unicode(definition.rstrip('].').lstrip('['))
 						message_ub = u"\t`Urban Dictionary Definition`\n\n"u" \t\t`\t\t> {word}:`\n\n"u"`{definition}`"u"`{example}`"u"[If you want more info on this, feel free to visit this link]({permalink})".format(word=word, definition=definition, example=example, permalink=permalink)
 						bot.send_message(cid, message_ub, parse_mode="Markdown", disable_web_page_preview=True)
 					else:
@@ -1059,7 +1240,7 @@ def ud(message):
 				else:
 					bot.send_message(cid, '`{error}`'.format(error=data.raise_for_status()), parse_mode="Markdown")
 			else:
-				bot.send_message(cid, "`Follow this command with your search and I will show you the definition of it.`", parse_mode="Markdown")
+				bot.send_message(cid, "`Follow this command with your search and I will show you the definition of it.\n\nExample:\n  /ud Robot`", parse_mode="Markdown")
 
 # Reddit
 
@@ -1875,6 +2056,7 @@ def steam_id(message):
 			cid = getCID(message)
 			url = "http://api.steampowered.com/ISteamApps/GetAppList/v2/?key=" + dota_key + "&format=JSON&language=en_us"
 			request = requests.get(url)
+			bot.send_chat_action(cid, 'typing') 
 			data = request.json()
 			found = False
 			if request.status_code == 200:
@@ -1905,26 +2087,31 @@ def steam_auto_page(message):
 			try:
 				data = request.text
 				soup = BeautifulSoup(data, "html.parser")
-
-				description = soup.findAll('div', class_='game_description_snippet')
-				description = description[0].string
-				description = description.replace("\t","")
-
-				review_points = soup.findAll('span', class_='game_review_summary')
-				review_points = review_points[0].string
-
-				release_date = soup.findAll('span', class_='date')
-				release_date = release_date[0].string
-
-				price = soup.findAll('div', class_="game_purchase_price price")
-				price = price[0].string
-				price = price.replace("\t","")
-				price = price.replace("\n","")
-
+				description = soup.find('div', class_='game_description_snippet').string.replace("\t","")
+				review_points = soup.find('span', class_='game_review_summary').string
+				review_points = review_points if review_points else ""
+				release_date = soup.find('span', class_='date').string
+				price = soup.find('div', class_="game_purchase_action_bg")
+				game_state = price.div['class'][0]
+				future_release = soup.find('div', class_="game_area_comingsoon game_area_bubble")
+				if game_state == "discount_block" and not future_release:
+					discounted = price.find('div', class_="discount_original_price").string.replace('\t', '').replace("\n","")
+					discount = price.find('div', class_="discount_pct").string
+					price = price.find('div', class_="discount_final_price").string.replace('\t','').replace('\n','')
+					price = discounted + " " + discount + " " + price  
+				elif not price:
+					price = soup.find('div', class_="game_area_comingsoon game_area_bubble")
+					price = price.h1.string
+					price = price.replace("\t", "").replace("\n", "")
+				else:
+					try:
+						price = price.div.string
+						price = price.replace("\t","")
+						price = "- " + price.replace("\n","")
+					except:
+						price = ""
 				img = soup.find('img', class_='game_header_image_full')['src']
-				
-				title = soup.findAll('div', class_='apphub_AppName')
-				title = title[0].string
+				title = soup.find('div', class_='apphub_AppName').string
 				invis = u"\u2063"
 				try:
 					image_prev = "[{invis}​​​​​​​​​]".format(invis=invis) + "({img})".format(img=img)
@@ -1950,47 +2137,39 @@ def steam_page(message):
 				try:
 					data = request.text
 					soup = BeautifulSoup(data, "html.parser")
-					description = soup.findAll('div', class_='game_description_snippet')
-					description = description[0].string
-					description = description.replace("\t","")
-					review_points = soup.findAll('span', class_='game_review_summary')
-					if review_points:
-						review_points = review_points[0].string
-					else:
-						review_points = ""
-					release_date = soup.findAll('span', class_='date')
-					release_date = release_date[0].string
-					price = soup.findAll('div', class_="game_purchase_price price")
-					future_release = soup.findAll('div', class_="game_area_comingsoon game_area_bubble")
-					if not price and not future_release:
-						price = soup.findAll('div', class_="discount_final_price")
-						price = price[0].string
-						price = price.replace("\t","")
-						price = price.replace("\n","")
-						discounted = soup.findAll('div', class_="discount_original_price")
-						discounted = discounted[0].string
-						discounted = discounted.replace("\t","")
-						discounted = discounted.replace("\n","")
-						price = price + " discounted from " + discounted
+					description = soup.find('div', class_='game_description_snippet').string.replace("\t","")
+					review_points = soup.find('span', class_='game_review_summary').string
+					review_points = review_points if review_points else ""
+					release_date = soup.find('span', class_='date').string
+					price = soup.find('div', class_="game_purchase_action_bg")
+					game_state = price.div['class'][0]
+					future_release = soup.find('div', class_="game_area_comingsoon game_area_bubble")
+					if game_state == "discount_block" and not future_release:
+						discounted = price.find('div', class_="discount_original_price").string.replace('\t', '').replace("\n","")
+						discount = price.find('div', class_="discount_pct").string
+						price = price.find('div', class_="discount_final_price").string.replace('\t','').replace('\n','')
+						price = discounted + " " + discount + " " + price  
 					elif not price:
-						price = soup.findAll('div', class_="game_area_comingsoon game_area_bubble")
-						price = price[0].h1.string
+						price = soup.find('div', class_="game_area_comingsoon game_area_bubble")
+						price = price.h1.string
 						price = price.replace("\t", "").replace("\n", "")
 					else:
-						price = price[0].string
-						price = price.replace("\t","")
-						price = price.replace("\n","")
+						try:
+							price = price.div.string
+							price = price.replace("\t","")
+							price = "- " + price.replace("\n","")
+						except:
+							price = ""
 					img = soup.find('img', class_='game_header_image_full')['src']
-					title = soup.findAll('div', class_='apphub_AppName')
-					title = title[0].string
-					bot.send_message(cid,u"`> {title} - {price} \n\n {description}\n\nUser reviews: {reviews}\nRelease date: {release_date}`".format(title=title, price=price, description=description, reviews = review_points, release_date=release_date) + u"[​]({image_prev})\n\n [More info]({url})".format(image_prev=img, url=url), parse_mode="Markdown")
+					title = soup.find('div', class_='apphub_AppName').string
+					bot.send_message(cid,u"`> {title} {price} \n\n {description}\n\nUser reviews: {reviews}\nRelease date: {release_date}`".format(title=title, price=price, description=description, reviews = review_points, release_date=release_date) + u"[​]({image_prev})\n\n [More info]({url})".format(image_prev=img, url=url), parse_mode="Markdown")
 				except:
 					bot.send_message(cid, u"`Sorry, I did not find any game with that ID, please try again or look it up with /steamid`", parse_mode="Markdown")
 			else:
 				bot.reply_to(message, "`There has been an error, the number {error} to be specific.`".format(error=request.status_code), parse_mode="Markdown")
 
 		else:
-			bot.reply_to(message, "`Follow this command with the ID of a steam game and I will give you its basic information, use /steamid if you dont know the ID of your game.`", parse_mode="Markdown")
+			bot.reply_to(message, "`Follow this command with the ID of a steam game and I will give you its basic information, use /steamid if you dont know the ID of your game.\n\nExample:\n  /steampage 570`", parse_mode="Markdown")
 			
 # Steam details
 
@@ -2011,36 +2190,35 @@ def steam_details(message):
 					for detail in details[0].find_all('div'):
 						if detail.text:
 							detlist += "> " + detail.text + "\n"
-					price = soup.findAll('div', class_="game_purchase_price price")
-					future_release = soup.findAll('div', class_="game_area_comingsoon game_area_bubble")
-					if not price and not future_release:
-						price = soup.findAll('div', class_="discount_final_price")
-						price = price[0].string
-						price = price.replace("\t","")
-						price = price.replace("\n","")
-						discounted = soup.findAll('div', class_="discount_original_price")
-						discounted = discounted[0].string
-						discounted = discounted.replace("\t","")
-						discounted = discounted.replace("\n","")
-						price = price + " discounted from " + discounted
+					price = soup.find('div', class_="game_purchase_action_bg")
+					game_state = price.div['class'][0]
+					future_release = soup.find('div', class_="game_area_comingsoon game_area_bubble")
+					if game_state == "discount_block" and not future_release:
+						discounted = price.find('div', class_="discount_original_price").string.replace('\t', '').replace("\n","")
+						discount = price.find('div', class_="discount_pct").string
+						price = price.find('div', class_="discount_final_price").string.replace('\t','').replace('\n','')
+						price = discounted + " " + discount + " " + price  
 					elif not price:
-						price = soup.findAll('div', class_="game_area_comingsoon game_area_bubble")
-						price = price[0].h1.string
+						price = soup.find('div', class_="game_area_comingsoon game_area_bubble")
+						price = price.h1.string
 						price = price.replace("\t", "").replace("\n", "")
 					else:
-						price = price[0].string
-						price = price.replace("\t","")
-						price = price.replace("\n","")
+						try:
+							price = price.div.string
+							price = price.replace("\t","")
+							price = "- " + price.replace("\n","")
+						except:
+							price = ""
 					title = soup.findAll('div', class_='apphub_AppName')
 					title = title[0].string
 
-					bot.send_message(cid,u"`- {title} - {price}\n\n{detlist}`".format(title=title, price=price, detlist=detlist) + "\n\n[More info]({url})".format(url=url) , parse_mode="Markdown", disable_web_page_preview=True)
+					bot.send_message(cid,u"`- {title} {price}\n\n{detlist}`".format(title=title, price=price, detlist=detlist) + "\n\n[More info]({url})".format(url=url) , parse_mode="Markdown", disable_web_page_preview=True)
 				except:
 					bot.send_message(cid, "`Sorry, I did not find any game with that ID, please try again or look it up with /steamid`", parse_mode="Markdown")					
 			else:
 				bot.reply_to(message, "`There has been an error, the number {error} to be specific.`".format(error=request.status_code), parse_mode="Markdown")
 		else:
-			bot.reply_to(message, "`Follow this command with the ID of a steam game and I will give you its details, use /steamid if you dont know the ID of your game.`")
+			bot.reply_to(message, "`Follow this command with the ID of a steam game and I will give you its details, use /steamid if you dont know the ID of your game.\n\nExample:\n  /steamdetails 570`")
 
 # Lyrics
 
@@ -2050,27 +2228,39 @@ def lyrics(message):
 		cid = getCID(message)
 		search = getContent(message)
 		if search and search != "-?":
-			search = re.findall(r'(.*) - {1}(.*)', search)
+			search = re.findall(r'(.*\S)\s?-\s?(.*)', search)
 			try:
-				artist = search[0][0]
-				song = search[0][1]
-				url = "http://lyrics.wikia.com/wiki/" + artist + ":" + song
+				artist = search[0][0].capitalize()
+				song = search[0][1].capitalize()
+				url = "https://www.musixmatch.com/lyrics/" + artist.replace("'", "-").replace(" ", "-") + "/" + song.replace("'", "-").replace(" ", "-")
+				print url
+				bot.send_chat_action(cid, 'typing')
 				request = requests.get(url)
 				data = request.text
 				soup = BeautifulSoup(data, "html.parser")
-				lyrics = soup.find('div', class_='lyricbox')
-				lyrics = lyrics.contents
-				lyric = ""
-				listlen = len(lyrics)
-				for line in lyrics[1:listlen-5]:
-				 	if line.string != None:
-				 		lyric += line.string
-				 	else:
-				 		lyric += "\n"
-				if message.chat.type != "private":
-					bot.send_message(cid, u"`> {artist} - {song}:\n\n{lyric}\n\nI suggest that you use this in private so we dont spam this group`".format(artist=artist, song=song, lyric=lyric), parse_mode="Markdown")
+				lyrics = soup.find('span', {'id' : 'lyrics-html'})
+				if lyrics == None:
+					url = "http://lyrics.wikia.com/wiki/" + artist + ":" + song
+					print url
+					request = requests.get(url)
+					data = request.text
+					soup = BeautifulSoup(data, "html.parser")
+					lyrics = soup.find('div', class_='lyricbox')
+					lyrics = lyrics.contents
+					lyric = ""
+					listlen = len(lyrics)
+					for line in lyrics[1:listlen-5]:
+					 	if line.string != None:
+					 		lyric += line.string
+				 		else:
+					 		lyric += "\n"
+					lyrics = lyric
 				else:
-					bot.send_message(cid, u"`> {artist} - {song}\n\n{lyric}`".format(artist=artist, song=song, lyric=lyric), parse_mode="Markdown")
+					lyrics = lyrics.contents[0]
+				if message.chat.type != "private":
+					bot.send_message(cid, u"`> {artist} - {song}:\n\n{lyric}\n\n`*I suggest that you use this in private so we dont spam this group*".format(artist=artist, song=song, lyric=lyrics), parse_mode="Markdown")
+				else:
+					bot.send_message(cid, u"`> {artist} - {song}\n\n{lyric}`".format(artist=artist, song=song, lyric=lyrics), parse_mode="Markdown")
 			except:
 				bot.reply_to(message, "`Lyric not found, make sure the name of the song is well written and in the correct format\n\n<artist> - <song>.`", parse_mode="Markdown")
 		else:
