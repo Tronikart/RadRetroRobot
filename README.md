@@ -70,11 +70,15 @@ BeautifulSoup
 |/lyrics \<artist\> - \<song\>|Returns the lyrics for a given song|
 |/diceroll [faces]|By default will roll a 6d|
 |/top|kek|
+|/todo \<-add\|-del\|-show\> \<text\>|Adds, deletes or shows content from the todo list|
+|/comics [page]|Returns a random comic from the list|
 |/weather \<city\>|Returns the information of the weather from that city|
+|/time \<city\>|Returns the time from that city|
+|/updatecomics|[ADMIN TOOL] Updates the comic list to the lastests|
 |/tw \<tweet\>|[ADMIN TOOL] Will tweet from the account associated to tweepy|
 |/message \<chatid\> \<text\>|[ADMIN TOOL] Sends a message to the chat|
 |/broadcast \<message\>|[ADMIN TOOL] Broadcasts a message to all the registered groups that are not in the quiet list|
-|/todo \<-add\|-del\|-show\> \<text\>|[ADMIN TOOL] Adds, deletes or shows content from the todo list|
+
     You can follow any command with -? to get info and examples
 
 #This bot will also auto detect:
