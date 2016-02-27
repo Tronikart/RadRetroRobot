@@ -260,8 +260,8 @@ def intime(message):
 # bot and admin chat id
 
 bot = telebot.TeleBot("BOT API KEY")
-adminid = bot.get_me().id
-botid = # Your Bots ID
+adminid = # your ID
+botid = bot.get_me().id
 
 try:
 	bot
