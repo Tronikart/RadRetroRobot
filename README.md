@@ -9,7 +9,7 @@ licensed under the GNU General Public License.
 ## How to setup
 Download this repository
 
-Setup your Telegram api key and all the respective keys on RRR.py
+Setup your Telegram api key and all the respective keys on utils.py
 
 Install [eternoir](https://github.com/eternnoir/pyTelegramBotAPI/) Telegram bot api
 
@@ -17,18 +17,18 @@ Run RRR.py using python 2.7
 
 ## Required dependencies
 
-tweepy
+`python -m pip install tweepy`
 
-sortedcontainers 
+`python -m pip install sortedcontainers`
 
-BeautifulSoup
+`python -m pip install BeautifulSoup`
 
-wikipedia
+`python -m pip install wikipedia`
 
 ## Plugins
 
 |Plugin | Brief explanation|
-:-------------| -------------
+:----------------| -------------
 |/help|Displays the basic help menu|
 |/ping|Returns back a message with basic user info|
 |/premades|Returns a list of commands of premades messages|
@@ -77,6 +77,7 @@ wikipedia
 |/weather \<city\>|Returns the information of the weather from that city|
 |/time \<city\>|Returns the time from that city|
 |/updatecomics|[ADMIN TOOL] Updates the comic list to the lastests|
+|/py \<command\>|[ADMIN TOOL] Executes a python command
 |/tw \<tweet\>|[ADMIN TOOL] Will tweet from the account associated to tweepy|
 |/message \<chatid\> \<text\>|[ADMIN TOOL] Sends a message to the chat|
 |/broadcast \<message\>|[ADMIN TOOL] Broadcasts a message to all the registered groups that are not in the quiet list|
@@ -84,6 +85,8 @@ wikipedia
     You can follow any command with -? to get info and examples
 
 #This bot will also auto detect:
+
+ **Youtube links** - and post the name of the channel with a link, the amount of views and subscribers
 
  **Subreddit post links** - post its text content in case its a text post or its basic information if its not a text post
  
