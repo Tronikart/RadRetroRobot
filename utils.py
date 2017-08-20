@@ -46,8 +46,8 @@ from datetime import datetime
 # bot and admin chat id
 
 bot = telebot.TeleBot("BOT API KEY")
-adminid = bot.get_me().id
-botid = # Your Bots ID
+adminid = #  your id
+botid = bot.get_me().id
 
 comic = comics
 uptime = datetime.now()
