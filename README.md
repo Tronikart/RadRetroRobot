@@ -1,3 +1,5 @@
+# [Currently being rewritten in Python 3 with own API wrapper]
+
 # RadRetroRobot
 
 Multifunctional Telegram Bot RadRetroRobot
