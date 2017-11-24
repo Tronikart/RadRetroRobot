@@ -29,13 +29,13 @@ Which of these keys are needed for what plugins
 
 | Key | Plugins they rely on | Where to get your key | 
 | :-- | :------------------- | :-------------------: |
-|bot|The whole functionality of the bot | [Bot Father](t.me/BotFather)|
-|weather| `weather` plugin|[OpenWeatherMap](https://openweathermap.org/price)|
-|reddit| Reddit `r` plugin and `autoReddit` | Not as much of a key, its just your [reddit](www.reddit.com) username|
-|lastfm|Every lastfm command, such as `np`, `fmalbums` and `fmtop`, `fmgrid` will work without this | [last.fm](https://www.last.fm/api) |
-|bing|This is used in the `steamid` command to improve the speed of the search| [Bing Web Search API](https://azure.microsoft.com/en-us/services/cognitive-services/bing-web-search-api/) |
-|steam| Almost every Steam command, even `steamid` will use this in case the bing search doesnt return any results, `steamdetails` and `steamnews`, `steamsales`, `autoSteam` and `steampage` will work without this | [Steam Web API](https://steamcommunity.com/dev/apikey)| 
-|tweepy|This will be needed for any Twitter related plugin, such as `tw` and `autoTweet`|[Twitter API](https://apps.twitter.com/)|
+|**bot**|The whole functionality of the bot | [Bot Father](t.me/BotFather)|
+|**weather**| `weather` plugin|[OpenWeatherMap](https://openweathermap.org/price)|
+|**reddit**| Reddit `r` plugin and `autoReddit` | Not as much of a key, its just your [reddit](www.reddit.com) username|
+|**lastfm**|Every lastfm command, such as `np`, `fmalbums` and `fmtop`, `fmgrid` will work without this | [last.fm](https://www.last.fm/api) |
+|**bing**|This is used in the `steamid` command to improve the speed of the search| [Bing Web Search API](https://azure.microsoft.com/en-us/services/cognitive-services/bing-web-search-api/) |
+|**steam**| Almost every Steam command, even `steamid` will use this in case the bing search doesnt return any results, `steamdetails` and `steamnews`, `steamsales`, `autoSteam` and `steampage` will work without this | [Steam Web API](https://steamcommunity.com/dev/apikey)| 
+|**tweepy**|This will be needed for any Twitter related plugin, such as `tw` and `autoTweet`|[Twitter API](https://apps.twitter.com/)|
 
 If you dont want to include one of these, you should also change the plugin's active state to `False` in order to avoid future issues.
 
