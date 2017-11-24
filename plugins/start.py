@@ -1,31 +1,32 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 from utils import *
 
-print "Loading " + __name__ + "..."
+print ('loading ' + __name__)
 
-# Start bot
+def action(bot, update, args):
+	uid = getUID(update)
+	cid = getCID(update)
 
-@bot.message_handler(commands=['start'])
-def send_welcome(message):
-
-	uid = str(message.from_user.id)
-	cid = str(message.chat.id)
-
-	if message.chat.type == 'private':
-		if uid not in loadjson("userlist"):
-			addUser(uid, message.from_user.first_name, "userlist")
-			about_bot(message)
+	if update.message.chat.type == 'private':
+		if str(uid) not in loadjson("userlist"):
+			addUser(uid, update.message.from_user.first_name, "userlist")
 			bot.send_message(uid, text_messages['startfirst'], parse_mode="Markdown")
 		else:
 			bot.send_message(uid, text_messages['start'], parse_mode="Markdown")
-	elif message.chat.type == 'group' or message.chat.type == 'supergroup':
+	elif update.message.chat.type == 'group' or update.message.chat.type == 'supergroup':
 		if uid not in loadjson("userlist"):
 			bot.reply_to(message, text_messages['startfirstgroup'], parse_mode="Markdown")
-			about_bot(message)
 		else:
 			bot.send_message(cid, text_messages['startgroup'], parse_mode="Markdown")
 			bot.send_message(uid, text_messages['startfromgroup'].format(title = message.chat.title), parse_mode="Markdown")
 	else:
 		pass
+	
+
+
+info = {	'triggers'	: 	'start',
+			'name'		:	'start',
+			'help'		: 	"Returns a simple greeting to open the chat with the bot.",
+			'example'	:	'',
+			'active'	: 	True,
+			'admin'		: 	False,
+			'arguments' :	""}

@@ -1,23 +1,17 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 from utils import *
 
-print "Loading " + __name__ + "..."
-		
-# Steam details
+print ('loading ' + __name__)
 
-@bot.message_handler(commands=['steamdetails'])
-def steam_details(message):
-	if intime(message):
-		appid = getContent(message)
-		cid = getCID(message)
-		if appid and appid != "-?":
-			url = "http://store.steampowered.com/app/" + appid + "/"
-			request = requests.get(url)
-			if request.status_code == 200:
-				soup = makesoup(url)
+def action(bot, update, args):
+	appid = ' '.join(args)
+	cid = getCID(update)
+	if appid:
+		url = "http://store.steampowered.com/app/" + appid + "/"
+		request = requests.get(url)
+		if request.status_code == 200:
+			if len(request.history) < 1:
 				try: 
+					soup = makesoup(url)
 					details = soup.findAll('div', class_="block responsive_apppage_details_left")
 					detlist = ""
 					for detail in details[0].find_all('div'):
@@ -44,11 +38,20 @@ def steam_details(message):
 							price = ""
 					title = soup.findAll('div', class_='apphub_AppName')
 					title = title[0].string
-
 					bot.send_message(cid,u"`- {title} {price}\n{detlist}`".format(title=title, price=price, detlist=detlist) + "\n\n[More info]({url})".format(url=url) , parse_mode="Markdown", disable_web_page_preview=True)
 				except:
 					bot.send_message(cid, "`Sorry, I did not find any game with that ID, please try again or look it up with /steamid`", parse_mode="Markdown")					
 			else:
-				bot.reply_to(message, "`There has been an error, the number {error} to be specific.`".format(error=request.status_code), parse_mode="Markdown")
+				bot.send_message(cid, u"`This game requires you to pass an age check, Im so sorry user but Im not even a year old, all I can do is give you this link `[steam page](" + url + ")", parse_mode="Markdown", disable_web_page_preview=True)
 		else:
-			bot.reply_to(message, "`Follow this command with the ID of a steam game and I will give you its details, use /steamid if you dont know the ID of your game.\n\nExample:\n  /steamdetails 570`")
+			update.message.reply_text("`There has been an error, the number {error} to be specific.`".format(error=request.status_code), parse_mode="Markdown", reply_to_message_id=update.message.message_id)
+	else:
+		update.message.reply_text("`Follow this command with the ID of a steam game and I will give you its details, use /steamid if you dont know the ID of your game.\n\nExample:\n  /steamdetails 570`", reply_to_message_id=update.message.message_id)
+
+info = {	'triggers'	: 	('steamdetails', 'sd'),
+			'name'		:	'Steam Details',
+			'help'		: 	"Follow this command with the ID of a steam game and I will give you its details, use /steamid if you dont know the ID of your game.",
+			'example'	:	'/steamdetails 504370',
+			'active'	: 	True,
+			'admin'		: 	False,
+			'arguments' :	"<steamid>"}

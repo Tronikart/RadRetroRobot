@@ -1,50 +1,49 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 from utils import *
 
-print "Loading " + __name__ + "..."
+print ('loading ' + __name__)
 
-@bot.message_handler(commands=['premades'])
-def prem(message):
-	if intime(message):
-		cid = getCID(message)
+def action(bot, update, args):
+	cid = getCID(update)
+	command = update.message.text
+	if command == '/premades':
 		bot.send_message(cid, text_messages['premade'])
-
-#	Excelente meme
-
-@bot.message_handler(commands=['ememe', 'em'])
-def prem_ememe(message):
-	if intime(message):
-		cid = getCID(message)
-		try:
-			rid = message.reply_to_message
-			bot.reply_to(rid, premade['ememe'], parse_mode="Markdown")
-		except:
-			bot.send_message(cid, premades['ememe'], parse_mode="Markdown")
-
-# Nice Meme
-
-@bot.message_handler(commands=['nmeme', 'nm'])
-def prem_nmeme(message):
-	if intime(message):
-		cid = getCID(message)
-		try:
-			rid = message.reply_to_message
-			bot.reply_to(rid, premade['nmeme'], parse_mode="Markdown")
-		except:
-			bot.send_message(cid, premades['nmeme'],parse_mode="Markdown")
-
-# Thanks
-
-@bot.message_handler(commands=['thanks'])
-def say_thanks(message):
-	if intime(message):
-		if message.from_user.id == adminid:
+	elif command == '/top':
+		if cid == degeneratesgroup:
 			try:
-				rid = message.reply_to_message
-				bot.reply_to(rid, "`We both thank you and love you!`", parse_mode="Markdown")
+				rid = update.message.reply_to_message
+				update.message.reply_text(random.choice(top_response_degen), parse_mode="Markdown", reply_to_message_id=update.message.message_id)
 			except:
-				pass
+				bot.send_message(cid, random.choice(top_response_degen), parse_mode="Markdown")
 		else:
-			pass
+			try:
+				rid = update.message.reply_to_message
+				update.message.reply_text(random.choice(top_response), parse_mode="Markdown", reply_to_message_id=update.message.message_id)
+			except:
+				bot.send_message(cid, random.choice(top_response), parse_mode="Markdown")
+	elif command == '/lenny' and cid is not degeneratesgroup:
+		try:
+			rid = update.message.reply_to_message
+			update.message.reply_text(premades['lenny'], parse_mode="Markdown", reply_to_message_id=update.message.message_id)
+		except:
+			bot.send_message(cid, premades['lenny'], parse_mode="Markdown")
+	elif command == '/stare' and cid is not degeneratesgroup:
+		try:
+			rid = update.message.reply_to_message
+			update.message.reply_text(premades['stare'], parse_mode="Markdown", reply_to_message_id=update.message.message_id)
+		except:
+			bot.send_message(cid, premades['stare'], parse_mode="Markdown")
+
+	elif command == '/shrug' and cid is not degeneratesgroup:
+		try:
+			rid = update.message.reply_to_message
+			update.message.reply_text(premades['shrug'], parse_mode="Markdown", reply_to_message_id=update.message.message_id)
+		except:
+			bot.send_message(cid, premades['shrug'], parse_mode="Markdown")
+
+info = {	'triggers'	:	('premades', 'top', 'lenny', 'stare', 'shrug'),
+			'name'		:	'Premades',
+			'help'		: 	'Premade text messages, send this command alone to get a list of them',
+			'example'	:	'',
+			'active'	: 	True,
+			'admin'		: 	False,
+			'arguments' :	''}

@@ -1,27 +1,21 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 from utils import *
 
-print "Loading " + __name__ + "..."
+print ('loading ' + __name__)
 
-# Steam Game page
-
-@bot.message_handler(commands=['steampage'])
-def steam_page(message):
-	if intime(message):
-		appid = getContent(message)
-		cid = getCID(message)
-		if appid and appid != "-?":
-			url = "http://store.steampowered.com/app/" + appid + "/"
-			request = requests.get(url)
-			if request.status_code == 200:
+def action(bot, update, args):
+	appid = ' '.join(args)
+	cid = getCID(update)
+	if appid:
+		url = "http://store.steampowered.com/app/" + appid + "/"
+		request = requests.get(url)
+		if request.status_code == 200:
+			if len(request.history) < 1:
 				try:
 					soup = makesoup(url)
 					description = soup.find('div', class_='game_description_snippet').string.replace("\t","")
 					review_points = soup.find('span', class_='game_review_summary')
 					review_points = review_points.string if review_points else ""
-					release_date = soup.find('span', class_='date').string
+					release_date = soup.find('div', class_='date').string
 					price = soup.find('div', class_="game_purchase_action_bg")
 					game_state = price.div['class'][0] if price else ""
 					future_release = soup.find('div', class_="game_area_comingsoon game_area_bubble")
@@ -47,8 +41,16 @@ def steam_page(message):
 				except:
 					bot.send_message(cid, u"`Sorry, I did not find any game with that ID, please try again or look it up with /steamid`", parse_mode="Markdown")
 			else:
-				bot.reply_to(message, "`There has been an error, the number {error} to be specific.`".format(error=request.status_code), parse_mode="Markdown")
-
+				bot.send_message(cid, u"`This game requires you to pass an age check, Im so sorry user but Im not even a year old, all I can do is give you this link `[steam page](" + url + ")", parse_mode="Markdown", disable_web_page_preview=True)
 		else:
-			bot.reply_to(message, "`Follow this command with the ID of a steam game and I will give you its basic information, use /steamid if you dont know the ID of your game.\n\nExample:\n  /steampage 570`", parse_mode="Markdown")
+			update.message.reply_text("`There has been an error, the number {error} to be specific.`".format(error=request.status_code), parse_mode="Markdown", reply_to_message_id=update.message.message_id)
+	else:
+		update.message.reply_text("`Follow this command with the ID of a steam game and I will give you its basic information, use /steamid if you dont know the ID of your game.\n\nExample:\n  /steampage 570`", parse_mode="Markdown", reply_to_message_id=update.message.message_id)
 	
+info = {	'triggers'	: 	('steampage', 'sp'),
+			'name'		:	'Steam Page',
+			'help'		: 	"Follow this command with the ID of a steam game and I will give you its basic information, use /steamid if you dont know the ID of your game.",
+			'example'	:	'/steampage 504370',
+			'active'	: 	True,
+			'admin'		: 	False,
+			'arguments' :	"<steamid>"}

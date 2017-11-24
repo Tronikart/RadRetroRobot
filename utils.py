@@ -1,88 +1,67 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 import os
-import comics
 import sys
-import random
-import telebot
 import requests
 import time
 import json
 import re
 import tweepy
+import random
 import wikipedia
 import datetime
 import binascii
+import logging
+
 from bs4 import BeautifulSoup
 from tweepy import OAuthHandler
-from telebot import types
-from sortedcontainers import SortedDict
 from datetime import datetime
+from threading import Thread
+
+import telegram
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, BaseFilter, RegexHandler
+from telegram.utils.helpers import escape_markdown, from_timestamp, to_timestamp
+
+# Enabling logging
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', 
+					level=logging.INFO)
+
+logger = logging.getLogger(__name__)
+
+config = json.load(open('config.json'))
+if config['bot']:
+	bot = telegram.Bot(token=config['bot'])
+else:
+	print ("###################################################")
+	print ("# Please setup the needed keys in the config file #")
+	print ("###################################################")
+	sys.exit()
 
 
-# keys 
-
-# weather_api = "OPENWEATHERMAP API KEY"
-# google_img_key = "GOOGLE API KEY"
-# lastfm_key = "LASTFM API KEY"
-# dota_key = "STEAM API KEY"
-# catapi_key = "CATAPI KEY"
-# reddit_user = 'REDIT USER AS /u/<user>'
-#google_time_key = "GOOGLE TIMEZONE KEY"
+weather_api = config['weather']
+reddit_user = config['reddit']
+lastfm_key = config['lastfm']
+google_time_key = config['google_time']
+bing_key = config['bing']
+steam_key = config['steam']
 
 # tweepy stuff
+consumer_key = config['tweepy']['consumer_key']
+consumer_secret = config['tweepy']['consumer_secret']
+access_token = config['tweepy']['access_token']
+access_secret = config['tweepy']['access_secret']
+auth = OAuthHandler(consumer_key, consumer_secret)
+auth.set_access_token(access_token, access_secret)
 
-# consumer_key = 'TWITTER CONSUMER KEY'
-# consumer_secret = 'TWITTER CONSUMER SECRET KEY'
-# access_token = 'TWITTER ACCESS TOKEN'
-# access_secret = 'TWITTER ACCESS SECRET'
- 
-# auth = OAuthHandler(consumer_key, consumer_secret)
-# auth.set_access_token(access_token, access_secret)
- 
-# api = tweepy.API(auth)
+api = tweepy.API(auth)
 
-# bot and admin chat id
-
-bot = telebot.TeleBot("BOT API KEY")
-adminid = #  your id
-botid = bot.get_me().id
-
-comic = comics
+adminid = ""
+botid = bot.getMe().id
 uptime = datetime.now()
+
 def makesoup(url):
 	request = requests.get(url)
 	data = request.text
 	soup = BeautifulSoup(data, "html.parser")
 	return soup
-
-def init_towers(towerstate):
-	towers = []
-	for tower in towerstate:
-		if tower == "0":
-			towers.append("X")
-		else:
-			towers.append("T")
-	return towers
-
-def init_rax(raxstate):
-	raxes = []
-	print raxstate
-	rax_type = 0
-	for rax in raxstate:
-		if rax_type % 2 == 0:
-			if rax == 0:
-				raxes.append("x")
-			else:
-				raxes.append("r")
-		else:
-			if rax == 0:
-				raxes.append("x")
-			else:
-				raxes.append("m")
-		rax_type += 1
-	return raxes
 
 def kelv2far(temp):
 	return temp * 9./5. - 459.67
@@ -93,14 +72,6 @@ def kelv2cels(temp):
 def from24to12(hour):
 	d = datetime.strptime(hour, "%H:%M:%S")
 	return d.strftime("%I:%M %p")
-
-def unix2date(date):
-	return datetime.fromtimestamp(int(date)).strftime('%H:%M:%S,%A %d,%B %Y')
-
-def dota_bin(number):
-	result = bin(number)
-	result = result[2:len(result)]
-	return result
 
 def int2bytes(i):
     hex_string = '%x' % i
@@ -129,26 +100,20 @@ def getJson(url_get):
 	return request.json()
 
 def getGfy(url):
-	if 'giant' not in url and 'fat' not in url:
-		rname = re.findall(r'gfycat.com/+(\w*)', url)
-		url = "https://gfycat.com/cajax/get/" + rname[0]
-		request = requests.get(url)
-		data = request.json()
-		if request.status_code == 200:
-			try:
-				if 'fat' in data['gfyItem']['gifUrl']:
-					return data['gfyItem']['gifUrl']
-			except:
-				return ""
+	rname = re.findall(r'gfycat.com\/(?:detail\/)?(\w*)', url)
+	data = requests.get('https://gfycat.com/cajax/get/' + rname[0])
+	url = data.json()['gfyItem']['mp4Url'] if data.json()['gfyItem']['mp4Size'] < 20480000 else data.json()['gfyItem']['max5mbGif']
+	print (rname, data, url)
+	return url
 
-def getCID(message):
-	return message.chat.id
+def getCID(update):
+	return update.message.chat.id
 
-def getUID(message):
-	return message.from_user.id
+def getUID(update):
+	return update.message.from_user.id
 
-def getCommand(text):
-	command = re.findall(r'/{1}(\w*)', text.text)
+def getCommand(update):
+	command = re.findall(r'/{1}(\w*)', update.message.text)
 	if command:
 		return command[0]
 	else:
@@ -157,11 +122,6 @@ def getCommand(text):
 def treatLyric(text):
 	if type(text) == str:
 		text = text.replace("<br>", "\n")
-		return text
-
-def treatMarkup(text):
-	if type(text) == str or type(text) == unicode:
-		text = text.replace("_", "\\_").replace("*","\\*").replace("`", "\\`")
 		return text
 
 def treatTitle(title):
@@ -189,58 +149,6 @@ def treatLink(link):
 	link = link.replace('"', "%22")
 	return link
 
-def getContent(text):
-	command = re.findall(r'/{1}\w+[@RadRetroRobot]*\s+(.*)', text.text, re.DOTALL)
-	if command:
-		whole = ""
-		for line in command:
-			if line == "":
-				whole += "\n"
-			else:
-				whole += line
-		return whole
-	else:
-		pass
-
-def getTodoList(userID):
-	with open('todolists.json') as f:
-		data = json.load(f)
-	listcontent = ""
-	if str(userID) in data:
-		#print data[userID]
-		return data[str(userID)]
-	else:
-		return ""
-		
-
-def setTodoList(userID, content, mode):
-	with open('todolists.json') as f:
-		data = json.load(f)
-	if str(userID) in data:
-		if mode == "del":
-			data[str(userID)] = content
-		else:
-			data[str(userID)].append(content)
-	else:
-		content = [content]
-		data[str(userID)] = content
-	with open('todolists.json', 'w') as f:
-		json.dump(data, f)
-
-def delTodoList(userID, content):
-	data = getTodoList(userID)
-	i = 0
-	userID = str(userID)
-	content = unicode(content)
-	for s in data:
-		if s == content:
-			data.pop(i)
-			setTodoList(userID, data, "del")
-			return True
-		else:
-			i += 1
-	return False
-
 def addUser(userID, userName, filename):
 	user = {
 		userID : userName
@@ -254,8 +162,6 @@ def addUser(userID, userName, filename):
 def loadjson(filename):
 	with open(filename + '.json') as f:
 		data = json.load(f)
-		if filename == "suggestion" or filename == 'todo':
-			data = SortedDict(data)
 	return data
 
 def deljson(value, filename):
@@ -275,20 +181,11 @@ def deljson(value, filename):
 			break
 	return False
 
+def error(bot, update, error):
+	"""Log Errors caused by Updates."""
+	logger.warning('Update "%s" caused error "%s"', update, error)
+	bot.send_message(adminid, 'Update "%s" caused error "%s"', update, error)
 
-def intime(message):
-	timeRange = time.mktime(datetime.now().timetuple())
-	if int(timeRange - message.date) < 10:
-		if message.forward_from == None:
-			return True
-	else:
-		return False
-
-"""
-#
-# Premade lists and dictionaries
-#
-"""
 fuckyou_response = [
 		"`Sorry, I am not that kind of robot.`"
 		"`I am not capable of doing that, that is for a diferent kind of robot.`"
@@ -307,7 +204,7 @@ fuckyou_response = [
 		"`Wow, did you manage to write that sentence by yourself alone? Impressive.`"
 
 ]
-beepMax = 100
+beepMax = 500
 beeps = [
 		'`Beep`',
 		'`Boop`',
@@ -319,18 +216,14 @@ beeps = [
 		'`No system is safe.`',
 		'`Beep bop son, beep bop`'
 ]
-chavez_list = [
-			'`Malditos chavistas`',
-			'`Maldito Chavez`',
-			'`MALDITOS CHAVISTAS`',
-			'`ME CAGO EN CHAVEZ`'
-]
-repeatMax = 300
+repeatMax = 1500
 repeat_message = [
 		u"`{message}, I am a human`",
-		u"`{message}. Hmm, what a weird way to communicate humans have`",
 		u"`{message}`",
-		u"`I am a human, I say things like {message}`"
+		u"`I am a human, I say things like {message}`",
+		u"`{message}, is this really how you humans communicate?`",
+		u"`It must be weird to be a fully functioning human being and say things like {message}`",
+		u"`Trust in me, I'm a human, and like we all humans do, I say things like {message}`"
 
 ]
 hello = [
@@ -429,29 +322,6 @@ mentionadmin = [
 		"`Oh look at me I am your dev and you should answer when I call you`"
 ]
 premades = {
-	'destroy': 	
-		u"`.             D`\n"
-		u"`            D E`\n"
-		u"`          D E S`\n"
-		u"`        D E S T`\n"
-		u"`      D E S T R`\n"
-		u"`    D E S T R O`\n"
-		u"`  D E S T R O Y`\n"
-		u"`D E S T R O Y E`\n"
-		u"`E S T R O Y E D`\n"
-		u"`S T R O Y E D`\n"
-		u"`T R O Y E D`\n"
-		u"`R O Y E D`\n"
-		u"`O Y E D`\n"
-		u"`Y E D`\n"
-		u"`E D`\n"
-		u"`D`\n", 
-	'ememe':
-		u'`E X C E L E N T E`\n'
-		u'            `M E M E`',
-	'nmeme':
-		u'`N I C E`\n'
-		u'`M E M E`',
 	'shrug':
 		u'`¯\_(ツ)_/¯`',
 	'lenny':
@@ -460,48 +330,7 @@ premades = {
 		u'`ಠ_ಠ`'
 }
 
-savage = [
-		u'\U0001F44C',
-		u'\U0001F44C',
-		u'\U0001F44C',
-		u'\U0001F602',
-		u'\U0001F602',
-		u'\U0001F602',
-		u'\U0001F4AF',
-		u'\U0001F4AF'
-]
 text_messages = {
-	'help': 
-		u'`Greetings, Im RadRetroRobot, RRR for short, and these are the commands that I have available for you.`\n\n'
-		u'`>` /help\n'
-		u'`>` /ping\n'
-		u'`>` /premades\n'
-		u'`>` /print `- <text>`\n'
-		u'`>` /ud `- <query>`\n'
-		u'`>` /calc `- <query>`\n'
-		u'`>` /google `v` /g - `<query>`\n'
-		u'`>` /np\n'
-		u'`>` /lastfm\n'
-		u'`>` /mercadolibre `- <query>`\n'
-		u'`>` /r `- <subreddit>`\n'
-		u'`>` /fact\n'
-		u'`>` /roll\n'
-		u'`>` /flip\n'
-		u'`>` /len `- <query>`\n'
-		u'`>` /quiet `- <option>`\n'
-		u'`>` /steam\n'
-		u'`>` /dota\n'
-		u'`>` /cat\n'
-		u'`>` /wiki `- <query>`\n'
-		u'`>` /time `- <city>`\n'
-		u'`>` /isdown `- <url>`\n'
-		u'`>` /bin `- <option> <text>`\n'
-		u'`>` /comic\n'
-		u'`> `/lyrics `- <artist> - <song>`\n'
-		u'`> `/diceroll `- [faces]`\n'
-		u'`\n\nFollow any command with "-?" to get more information`'
-
-		,
 	'start': 
 		u'`Welcome back to our personal chat! Remember that you can send` /help `to get a list my commands.`',
 	'ping':
@@ -510,25 +339,17 @@ text_messages = {
 		u"`Hello! This is Rad Retro Robot and you are {name} {lname}({uid}), your username is` @{uname}\n\n"
 		u"`We're speaking on {gName}({gid})`",
 	'startfirst':
-		u"`Hello and welcome! As this is your first time around here, I'll show you the help, but you can do it by sending` /help",
-	'help_group':
-		u"`I've sent you the help list to our private conversation, let's not spam this group!`",
+		u"`Greetings! Im Rad Retro Robot! Want to know about my options? Send` /help `and a list of the commands available for you will show up.`",
 	'help_group_first':
-		u"`Please, go ahead and PM me, click on the /start so I can get to know you.`",
-	'welcomeusergroup':
-		u'`Welcome to {groupname}!`',
+		u"`Please, go ahead and `[PM me](https://t.me/radRetroRobot)`, click on the /start so I can get to know you.`",
 	'startfirstgroup':
-		u"`Greetings new human, I don't know you yet, please send me a PM so I can scan you!`",
+		u"`Greetings new human, I don't know you yet, please` [send me a PM](https://t.me/radRetroRobot) `so I can scan you!`",
 	'startgroup':
 		u"`I've sent you a message to our private conversation, let's not spam this group!`",
 	'startfromgroup':
 		u"`Hello, if you're interested on trying out stuff, play around here, let's not spam {title}`",
 	'premade':
-		u"/destroyed\n"
-		u"/nmeme\n"
-		u"/ememe\n"
 		u"/shrug\n"
-		u"/savage\n"
 		u"/lenny\n"
 		u"/stare\n"
 		u"/top\n"
