@@ -102,7 +102,7 @@ def getJson(url_get):
 def getGfy(url):
 	rname = re.findall(r'gfycat.com\/(?:detail\/)?(\w*)', url)
 	data = requests.get('https://gfycat.com/cajax/get/' + rname[0])
-	url = data.json()['gfyItem']['mp4Url'] if data.json()['gfyItem']['mp4Size'] < 20480000 else data.json()['gfyItem']['max5mbGif']
+	url = data.json()['gfyItem']['mp4Url'] if int(data.json()['gfyItem']['mp4Size']) < 20480000 else data.json()['gfyItem']['max5mbGif']
 	print (rname, data, url)
 	return url
 
