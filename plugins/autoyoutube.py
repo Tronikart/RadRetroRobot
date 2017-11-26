@@ -12,7 +12,11 @@ def action(bot, update):
 		channel_info = soup.find("div", class_="yt-user-info")
 		channel_name = channel_info.a.string
 		channel_url = "http://www.youtube.com" + channel_info.a['href']
-		duration = int(re.findall(r'dur%3D(\d+).+', soup.text)[0])
+		duration = int(re.findall(r'dur%3D(\d+)\.', soup.text)[0])
+		if duration == 0:
+			duration = int(re.findall(r'dur%3D(\d+)\.', soup.text)[1])
+		else:
+			pass
 		m, s = divmod(duration, 60)
 		h, m = divmod(m, 60)
 		duration = "%d:%02d:%02d" % (h, m, s) if h > 0 else "%02d:%02d" % (m, s)
