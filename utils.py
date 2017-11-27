@@ -103,8 +103,8 @@ def getGfy(url):
 	rname = re.findall(r'gfycat.com\/(?:detail\/)?(\w*)', url)
 	data = requests.get('https://gfycat.com/cajax/get/' + rname[0])
 	url = data.json()['gfyItem']['mp4Url'] if int(data.json()['gfyItem']['mp4Size']) < 20480000 else data.json()['gfyItem']['max5mbGif']
-	print (rname, data, url)
-	return url
+	title = data.json()['gfyItem']['title']
+	return url, title
 
 def getCID(update):
 	return update.message.chat.id
