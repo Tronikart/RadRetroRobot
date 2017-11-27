@@ -29,19 +29,19 @@ class RegexFilter(BaseFilter):
 		return '/s/' == message.text[0:3]
 
 def regex(bot, update):
-	# try:
-	cid = getCID(update)
-	rid = update.message.reply_to_message
-	content = update.message.text
-	if content.split('/')[1] == 's':
-		lookfor = r"" + content.split('/')[2]
-		replacewith = r"" + content.split('/')[3]
-		final_text = re.sub(lookfor, replacewith, rid.text)
-		update.message.reply_text("`" + final_text + "`", parse_mode="Markdown", reply_to_message_id=update.message.message_id)
-	else:
+	try:
+		cid = getCID(update)
+		rid = update.message.reply_to_message
+		content = update.message.text
+		if content.split('/')[1] == 's':
+			lookfor = r"" + content.split('/')[2]
+			replacewith = r"" + content.split('/')[3]
+			final_text = re.sub(lookfor, replacewith, rid.text)
+			update.message.reply_text("`" + final_text + "`", parse_mode="Markdown", reply_to_message_id=update.message.message_id)
+		else:
+			pass
+	except:
 		pass
-	# except:
-	# 	pass
 
 regex_filter = RegexFilter()
 dispatcher.add_handler(MessageHandler(Filters.command & regex_filter, regex))
