@@ -11,7 +11,7 @@ Clone this repository
 
 Setup your Telegram bot key and all the respective keys on config.json
 
-Install [python-telegram-bot](https://python-telegram-bot.org) API Wrapper
+Install [python-telegram-bot](https://python-telegram-bot.org) API Wrapper and the required dependencies
 
 Run RRR.py using Python 3.X
 
@@ -49,15 +49,17 @@ Following /help with a plugin will give a more detailed overview of said plugin,
 
 ### This bot will also auto detect:
 
- **Youtube links** - and post the name of the channel with a link, duration of the video, the amount of views and subscribers
+ **Youtube links** - post the name of the channel with a link, duration of the video, the amount of views and subscribers
 
- **Subreddit post links** - post its text content in case its a text post or its basic information if its not a text post
+ **Subreddit post links** - post its text content in case its a text post, otherwise it will try to send the picture or link as a gif, sending the link as a last resort
  
  **Tweet links** - post its basic information with the full text of the tweet, if the tweet has a quoted tweet, will post the quoted tweet
  
  **Steam Store links** - post its basic information as if the user used /steampage
  
- **Gfycat links** - return the .gif if the gif can show the preview on Telegram
+ **Gfycat links** - return the .mp4 as a document (this means as a gif) if the file is not too large for telegram, otherwise it will try to send a smaller version
+ 
+ **Imgur gif and gifv links** - return the .mp4 version as a document (this means as a gif)
  
  **Good night messages** - with special messages for admin
  
