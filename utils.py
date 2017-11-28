@@ -53,8 +53,11 @@ auth.set_access_token(access_token, access_secret)
 
 api = tweepy.API(auth)
 
-adminid = ""
+adminid = 25929203
 botid = bot.getMe().id
+degeneratesgroup = -37148522
+tesorosgroup = -1001003269822
+main_group = -448768
 uptime = datetime.now()
 
 def makesoup(url):
@@ -100,10 +103,19 @@ def getJson(url_get):
 	return request.json()
 
 def getGfy(url):
-	rname = re.findall(r'gfycat.com\/(?:detail\/)?(\w*)', url)
+	rname = re.findall(r'gfycat.com/[gifs/detail/]*(\w*)', url)
 	data = requests.get('https://gfycat.com/cajax/get/' + rname[0])
 	url = data.json()['gfyItem']['mp4Url'] if int(data.json()['gfyItem']['mp4Size']) < 20480000 else data.json()['gfyItem']['max5mbGif']
 	title = data.json()['gfyItem']['title']
+	print (rname, data, url)
+	return url, title
+
+def getImgur(url):
+	url = re.findall(r'(http[s]?://i.imgur.com/.+.gif[v]?)', url)[0]
+	url = url if url[-1] == 'v' else url + "v"
+	request = requests.get(url)
+	title = BeautifulSoup(request.text, 'html.parser').title.text
+	url = url.replace('gifv', 'mp4').replace('gif', 'mp4')
 	return url, title
 
 def getCID(update):
