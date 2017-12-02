@@ -105,10 +105,12 @@ def getJson(url_get):
 def getGfy(url):
 	rname = re.findall(r'gfycat.com/[gifs/detail/]*(\w*)', url)
 	data = requests.get('https://gfycat.com/cajax/get/' + rname[0])
-	url = data.json()['gfyItem']['mp4Url'] if int(data.json()['gfyItem']['mp4Size']) < 20480000 else data.json()['gfyItem']['max5mbGif']
-	title = data.json()['gfyItem']['title']
+	url = data.json()['gfyItem']['mp4Url']
+	url2 = data.json()['gfyItem']['mobileUrl']
+	url3 = data.json()['gfyItem']['miniUrl']
+	title = data.json()['gfyItem']['title'] if data.json()['gfyItem']['title'] else ""
 	print (rname, data, url)
-	return url, title
+	return url, url2, url3, title
 
 def getImgur(url):
 	url = re.findall(r'(http[s]?://i.imgur.com/.+.gif[v]?)', url)[0]
