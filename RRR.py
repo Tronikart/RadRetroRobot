@@ -8,14 +8,23 @@ dispatcher = updater.dispatcher
 
 for plugin in plugins.__all__:
 	active = eval(plugin).info['active']
-	if "auto" not in plugin:
+	if "auto" not in plugin and "inline" not in plugin:
 		if active:
 			handler = CommandHandler(eval(plugin).info['triggers'], eval(plugin).action, pass_args=True)
 			dispatcher.add_handler(handler)
 		else:
 			pass
+	elif "inline" in plugin:
+		if active:
+			handler = CommandHandler(eval(plugin).info['triggers'], eval(plugin).action, pass_args=True)
+			dispatcher.add_handler(handler)
+			handler = CallbackQueryHandler(eval(plugin).button)
+			dispatcher.add_handler(handler)
+		else:
+			pass
 	else:
 		if active:
+			print (eval(plugin).info['triggers'])
 			handler = RegexHandler(eval(plugin).info['triggers'], eval(plugin).action)
 			dispatcher.add_handler(handler)
 		else:
@@ -29,19 +38,20 @@ class RegexFilter(BaseFilter):
 		return '/s/' == message.text[0:3]
 
 def regex(bot, update):
-	try:
-		cid = getCID(update)
-		rid = update.message.reply_to_message
+	# try:
+	cid = getCID(update)
+	rid = update.message.reply_to_message
+	if rid and cid != degeneratesgroup:
 		content = update.message.text
 		if content.split('/')[1] == 's':
 			lookfor = r"" + content.split('/')[2]
 			replacewith = r"" + content.split('/')[3]
 			final_text = re.sub(lookfor, replacewith, rid.text)
 			update.message.reply_text("`" + final_text + "`", parse_mode="Markdown", reply_to_message_id=update.message.message_id)
-		else:
-			pass
-	except:
+	else:
 		pass
+	# except:
+	# 	pass
 
 regex_filter = RegexFilter()
 dispatcher.add_handler(MessageHandler(Filters.command & regex_filter, regex))
