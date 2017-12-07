@@ -41,9 +41,9 @@ def action(bot, update, args):
 							InlineKeyboardButton("Cancel", callback_data="False")]]
 				
 				reply_markup = InlineKeyboardMarkup(keyboard)
-				update.message.reply_text("`This album has " + gifs + videos + images + other + "do you want to proceed?`", reply_markup=reply_markup, parse_mode="Markdown")
+				update.message.reply_text("`This album has " + gifs + videos + images + other + "do you want to proceed?\n\nKeep in mind that the bigger the album, the longer it will take, be patient please.`", reply_markup=reply_markup, parse_mode="Markdown")
 			else:
-				update.message.reply_text("`This album only has 1 element, no action required.`", reply_markup=reply_markup, parse_mode="Markdown")
+				update.message.reply_text("`This album only has 1 element, no action required.`", parse_mode="Markdown")
 		else:
 			update.message.reply_text("`Something went wrong:" + str(request.status_code)  + "\n" + data['data']['error'] + "`", parse_mode="Markdown")
 	else:
@@ -67,19 +67,20 @@ def button(bot, update):
 				if "image" in post['type'] and not "gif" in post['type']:
 					caption = post['description'] if post['description'] else ""
 					if len(caption) < 200:
-						bot.send_photo(cid, post['link'], caption=treatTitle(caption))
+						bot.send_photo(cid, post['link'], caption=treatTitle(caption), timeout=60)
 					else:
-						bot.send_photo(cid, post['link'])
+						bot.send_photo(cid, post['link'], timeout=60)
 						bot.send_message(cid, treatTitle(caption))
 				elif "video" in post['type'] or "gif" in post['type']:
 					caption = post['description'] if post['description'] else ""
 					if len(caption) < 200:
-						bot.send_document(cid, post['link'], caption=treatTitle(caption))
+						bot.send_document(cid, post['link'], caption=treatTitle(caption), timeout=60)
 					else:
-						bot.send_document(cid, post['link'])
+						bot.send_document(cid, post['link'], timeout=60)
 						bot.send_message(cid, treatTitle(caption))
 				else:
 					pass
+			bot.edit_message_text("`Album sent.`", query.message.chat_id, message_id=query.message.message_id, parse_mode="Markdown", reply_markup=None)
 			data = ""
 		else: 
 			bot.edit_message_text("`Expired.`", query.message.chat_id, message_id=query.message.message_id, parse_mode="Markdown")
