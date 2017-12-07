@@ -54,8 +54,12 @@ def action(bot, update, args):
 def button(bot, update):
 	global data
 	query = update.callback_query
-	sender = query.message.reply_to_message.from_user.id
-	clicker = query.from_user.id
+	if query.message.chat.type == "private":
+		sender = "NA"
+		clicker = "NA"
+	else:
+		sender = query.message.reply_to_message.from_user.id
+		clicker = query.from_user.id
 	cid = query.message.chat_id
 	if eval(query.data) and clicker == sender:
 		if data:
