@@ -24,7 +24,9 @@ def action(bot, update, args):
 	elif cid == main_group:
 		pass
 	else:
-		update.message.reply_text(get_help(info, __name__), parse_mode="Markdown", reply_to_message_id=update.message.message_id)
+		update.message.reply_text("`" + get_help(info) +  "`", parse_mode="Markdown", reply_to_message_id=update.message.message_id)
+
+
 
 info = {	'triggers'	:	'calc',
 			'name'		:	'calc',
