@@ -17,7 +17,8 @@ from datetime import datetime
 from threading import Thread
 
 import telegram
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, BaseFilter, RegexHandler
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, BaseFilter, RegexHandler, CallbackQueryHandler
 from telegram.utils.helpers import escape_markdown, from_timestamp, to_timestamp
 
 # Enabling logging
@@ -36,19 +37,21 @@ else:
 	sys.exit()
 
 
-weather_api = config['weather']
-reddit_user = config['reddit']
-lastfm_key = config['lastfm']
+weather_api 	= config['weather']
+reddit_user 	= config['reddit']
+lastfm_key 		= config['lastfm']
 google_time_key = config['google_time']
-bing_key = config['bing']
-steam_key = config['steam']
+bing_key 		= config['bing']
+steam_key 		= config['steam']
+imgur_id 		= config['imgur']
 
 # tweepy stuff
-consumer_key = config['tweepy']['consumer_key']
+consumer_key 	= config['tweepy']['consumer_key']
 consumer_secret = config['tweepy']['consumer_secret']
-access_token = config['tweepy']['access_token']
-access_secret = config['tweepy']['access_secret']
-auth = OAuthHandler(consumer_key, consumer_secret)
+access_token 	= config['tweepy']['access_token']
+access_secret 	= config['tweepy']['access_secret']
+auth 			= OAuthHandler(consumer_key, consumer_secret)
+
 auth.set_access_token(access_token, access_secret)
 
 api = tweepy.API(auth)
@@ -59,6 +62,19 @@ degeneratesgroup = -37148522
 tesorosgroup = -1001003269822
 main_group = -448768
 uptime = datetime.now()
+
+def get_help(info):
+	if type(info['triggers']) == tuple:
+			trigger = info['triggers'][0]
+			triggers =  "\n\n    Alternative Triggers:"
+			for trigger in info['triggers']:
+				triggers += "\n        " + trigger
+	else:
+		triggers = ""
+	if info['example']:
+		return "> " + info['name'] + "`\n\n    /" + trigger + " `" + info['arguments'] + "\n\n    " + info['help'].replace('\n', '\n    ') + "\n\n    Example:\n        " + info['example'].replace('\n', '\n        ') + triggers
+	else:
+		return "> " + info['name'] + "`\n\n    /" + trigger + " `" + info['arguments'] + "\n\n    " + info['help'].replace('\n', '\n    ') + triggers
 
 def makesoup(url):
 	request = requests.get(url)
