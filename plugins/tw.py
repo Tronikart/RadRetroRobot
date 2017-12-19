@@ -6,8 +6,8 @@ def action(bot, update, args):
 	tweet = ' '.join(args)
 	if update.message.from_user.id == adminid:
 		if len(tweet) <= 280 and tweet:
-			api.update_status(tweet)
-			bot.send_message(adminid, "`Tweet sent.`", parse_mode="Markdown")
+			tweet = api.update_status(tweet)
+                        bot.send_message(adminid, "`Tweet sent.`\n\n[url](https://twitter.com/_Abrah/status/" + str(tweet.id) + ")", parse_mode="Markdown")
 		else:
 			update.message.reply_text("`Tweet is " + str(len(tweet) - 140) + " characters longer than accepted lenght`", parse_mode="Markdown", reply_to_message_id=update.message.message_id)
 	else:
