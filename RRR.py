@@ -128,7 +128,7 @@ def help(bot, update, args):
 
 		bot.send_message(CID, message, parse_mode="Markdown")
 	else:
-		message = "`Heres a list of the currently active plugins:\n\n`"
+		message = "`Heres a list of the currently active plugins:\n\n`"		commands = []
 		for plugin in plugins.__all__:
 			if "auto" not in plugin:
 				# If the plugin is active
@@ -136,15 +136,15 @@ def help(bot, update, args):
 				if command.info['active']:
 					# Check if its admin command and if user is admin
 					if command.info['admin'] and UID == adminid:
-						message += "`> `/" + plugin.lower() + "` " + command.info['arguments'] + " [admin]`\n"
+						commands.append("`> `/" + plugin.lower() + "` " + command.info['arguments'] + " [admin]`\n")
 					elif not command.info['admin']:
-						message += "`> `/" + plugin.lower() + "` " + command.info['arguments'] + "`\n"
+						commands.append("`> `/" + plugin.lower() + "` " + command.info['arguments'] + "`\n")
 					else:
 						pass
 			else:
 				pass
-
-		bot.send_message(CID, message + "\n\n`Some of them will work right away, others need extra arguments, to know more about any command, send /help <command>`", parse_mode="Markdown")
+		commands.sort()
+		bot.send_message(CID, message + " ".join(commands) + "\n\n`Some of them will work right away, others need extra arguments, to know more about any command, send /help <command>`", parse_mode="Markdown")
 
 def stop_and_restart():
 	"""Gracefully stop the Updater and replace the current process with a new one"""
