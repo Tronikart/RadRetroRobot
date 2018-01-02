@@ -66,9 +66,28 @@ def help(bot, update, args):
 	if len(args) == 1:
 		# Check if exists
 		try: 
-			command = eval(args[0].lower())
+			try:
+				command = eval(args[0].lower())
+				success = True
+			except:
+				success = False
+				for plugin in plugins.__all__:
+					if "auto" not in plugin:
+						command = eval(plugin)
+						if command.info['active']:
+							if type(command.info['triggers']) == tuple:
+								for trigger in command.info['triggers']:
+									if args[0].lower() == trigger:
+										success = True
+										break
+							else:
+								if args[0].lower() == command.info['triggers']:
+									success = True
+							if success:
+								break
+
 			# Check if its active
-			if command.info['active']:
+			if command.info['active'] and success:
 				if type(command.info['triggers']) == tuple:
 						triggers =  "\n\n    Alternative Triggers:"
 						for trigger in command.info['triggers']:
@@ -90,6 +109,8 @@ def help(bot, update, args):
 						bot.send_message(CID,"`> " + command.info['name'] + "`\n\n    /" + args[0] + " `" + command.info['arguments'] + "\n\n    " + command.info['help'].replace('\n', '\n    ') + triggers + "`", parse_mode="Markdown")
 				else:
 					pass
+			else:
+				bot.send_message(CID, "`Theres no " + args[0] +" command.`", parse_mode="Markdown" )
 		except:
 			bot.send_message(CID, "`Theres no " + args[0] +" command.`", parse_mode="Markdown" )
 
@@ -128,7 +149,8 @@ def help(bot, update, args):
 
 		bot.send_message(CID, message, parse_mode="Markdown")
 	else:
-		message = "`Heres a list of the currently active plugins:\n\n`"		commands = []
+		message = "`Heres a list of the currently active plugins:\n\n`"
+		commands = []
 		for plugin in plugins.__all__:
 			if "auto" not in plugin:
 				# If the plugin is active
@@ -136,9 +158,15 @@ def help(bot, update, args):
 				if command.info['active']:
 					# Check if its admin command and if user is admin
 					if command.info['admin'] and UID == adminid:
-						commands.append("`> `/" + plugin.lower() + "` " + command.info['arguments'] + " [admin]`\n")
+						if type(command.info['triggers']) == tuple:
+							commands.append("`> `/" + command.info['triggers'][0] + "` " + command.info['arguments'] + " [admin]`\n")
+						else:
+							commands.append("`> `/" + command.info['triggers'] + "` " + command.info['arguments'] + " [admin]`\n")
 					elif not command.info['admin']:
-						commands.append("`> `/" + plugin.lower() + "` " + command.info['arguments'] + "`\n")
+						if type(command.info['triggers']) == tuple:
+							commands.append("`> `/" + command.info['triggers'][0] + "` " + command.info['arguments'] + "`\n")
+						else:
+							commands.append("`> `/" + command.info['triggers'] + "` " + command.info['arguments'] + "`\n")
 					else:
 						pass
 			else:
