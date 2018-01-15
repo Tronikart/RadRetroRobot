@@ -70,11 +70,12 @@ def get_help(info):
 			for trigger in info['triggers']:
 				triggers += "\n        " + trigger
 	else:
-		triggers = ""
+		trigger = info['triggers']
+		triggers = trigger
 	if info['example']:
-		return "> " + info['name'] + "`\n\n    /" + trigger + " `" + info['arguments'] + "\n\n    " + info['help'].replace('\n', '\n    ') + "\n\n    Example:\n        " + info['example'].replace('\n', '\n        ') + triggers
+		return "`> " + info['name'] + "`\n\n    /" + trigger + " `" + info['arguments'] + "\n\n    " + info['help'].replace('\n', '\n    ') + "\n\n    Example:\n        " + info['example'].replace('\n', '\n        ') + triggers + "`"
 	else:
-		return "> " + info['name'] + "`\n\n    /" + trigger + " `" + info['arguments'] + "\n\n    " + info['help'].replace('\n', '\n    ') + triggers
+		return "`> " + info['name'] + "`\n\n    /" + trigger + " `" + info['arguments'] + "\n\n    " + info['help'].replace('\n', '\n    ') + triggers + "`"
 
 def makesoup(url):
 	request = requests.get(url)
