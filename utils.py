@@ -155,6 +155,53 @@ def treatLyric(text):
 		text = text.replace("<br>", "\n")
 		return text
 
+def urlsForAlbum(urls):
+	video_output = []
+	photo_output = []
+	for url in urls:
+		if "mp4" in url or "gif" in url:
+			video_output.append(
+							telegram.InputMediaVideo(
+								media		=	url['url'],
+								caption	=	url['caption']
+							)
+						)
+		else:
+			photo_output.append(
+							telegram.InputMediaPhoto(
+								media		=	url['url'],
+								caption	=	url['caption']
+							)
+
+						)
+	return photo_output, video_output
+
+def sendAlbums(data_type, array, cid):
+	if data_type == "photo":
+		if len(array) > 10:
+			number = len(array)
+			start = 0
+			stop = 10
+			while number > 0:
+				bot.send_media_group(cid, array[start:stop])
+				start = stop
+				stop += 10
+				number -= 10
+		else:
+			bot.send_media_group(cid, array)
+	else:
+		if len(array) > 10:
+			number = len(array)
+			start = 0
+			stop = 9
+			while number > 0:
+				bot.send_media_group(cid, array[start:stop])
+				start = stop
+				stop += 10
+				number -= 10
+		else:
+			bot.send_media_group(cid, array)
+
 def treatTitle(title):
 	title = title.replace("&amp;", "&")
 	title = title.replace("&#39;", "\'")
