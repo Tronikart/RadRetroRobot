@@ -41,7 +41,7 @@ def action(bot, update):
 				if media:
 					update.message.reply_text("[" + username + " - @" + user + "](" + url + ")" + "\n`RTs:" + RTs + " | Likes: " + favs +"`", parse_mode="Markdown", reply_to_message_id=update.message.message_id, disable_web_page_preview=True)
 					bot.send_document(cid, media)
-				elif urls:
+				elif urls and len(urls) > 1:
 					update.message.reply_text("[" + username + " - @" + user + "](" + url + ")" + "\n`RTs:" + RTs + " | Likes: " + favs +"`", parse_mode="Markdown", reply_to_message_id=update.message.message_id, disable_web_page_preview=True)
 					if photos:
 						sendAlbums("photo", photos, cid)
@@ -53,7 +53,7 @@ def action(bot, update):
 				if media:
 					update.message.reply_text("[" + username + " - @" + user + "](" + url + ")\n" + tweet + "\n`RTs:" + RTs + " | Likes: " + favs + "`", parse_mode="Markdown", reply_to_message_id=update.message.message_id, disable_web_page_preview=True)
 					bot.send_document(cid, media)
-				elif urls:
+				elif urls and len(urls) > 1:
 					update.message.reply_text("[" + username + " - @" + user + "](" + url + ")\n" + tweet + "\n`RTs:" + RTs + " | Likes: " + favs + "`", parse_mode="Markdown", reply_to_message_id=update.message.message_id, disable_web_page_preview=True)
 					if photos:
 						sendAlbums("photo", photos, cid)
