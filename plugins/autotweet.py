@@ -19,6 +19,14 @@ def action(bot, update):
 			media = media[len(media)-1]['url']
 		except:
 			media = False
+		try:
+			urls = []
+			for image in status.extended_entities['media']:
+				urls.append({'url':image['media_url'], 'caption': ""})
+			photos, videos = urlsForAlbum(urls)
+		except:
+			urls = False
+
 	except:
 		pass
 	try:
@@ -33,12 +41,24 @@ def action(bot, update):
 				if media:
 					update.message.reply_text("[" + username + " - @" + user + "](" + url + ")" + "\n`RTs:" + RTs + " | Likes: " + favs +"`", parse_mode="Markdown", reply_to_message_id=update.message.message_id, disable_web_page_preview=True)
 					bot.send_document(cid, media)
+				elif urls:
+					update.message.reply_text("[" + username + " - @" + user + "](" + url + ")" + "\n`RTs:" + RTs + " | Likes: " + favs +"`", parse_mode="Markdown", reply_to_message_id=update.message.message_id, disable_web_page_preview=True)
+					if photos:
+						sendAlbums("photo", photos, cid)
+					if videos:
+						sendAlbums("video", videos, cid)
 				else:
 					update.message.reply_text("[" + username + " - @" + user + "](" + url + ")" + "\n`RTs:" + RTs + " | Likes: " + favs +"`", parse_mode="Markdown", reply_to_message_id=update.message.message_id, disable_web_page_preview=True)
 			else:
 				if media:
 					update.message.reply_text("[" + username + " - @" + user + "](" + url + ")\n" + tweet + "\n`RTs:" + RTs + " | Likes: " + favs + "`", parse_mode="Markdown", reply_to_message_id=update.message.message_id, disable_web_page_preview=True)
 					bot.send_document(cid, media)
+				elif urls:
+					update.message.reply_text("[" + username + " - @" + user + "](" + url + ")\n" + tweet + "\n`RTs:" + RTs + " | Likes: " + favs + "`", parse_mode="Markdown", reply_to_message_id=update.message.message_id, disable_web_page_preview=True)
+					if photos:
+						sendAlbums("photo", photos, cid)
+					if videos:
+						sendAlbums("video", videos, cid)
 				else:
 					update.message.reply_text("[" + username + " - @" + user + "](" + url + ")\n" + tweet + "\n`RTs:" + RTs + " | Likes: " + favs + "`", parse_mode="Markdown", reply_to_message_id=update.message.message_id, disable_web_page_preview=True)
 					

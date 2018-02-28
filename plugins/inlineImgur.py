@@ -62,24 +62,26 @@ def button(bot, update):
 		clicker = query.from_user.id
 	cid = query.message.chat_id
 	if eval(query.data) and clicker == sender:
+		urls = []
 		if data:
 			for post in data['data']:
 				if "image" in post['type'] and not "gif" in post['type']:
 					caption = post['description'] if post['description'] else ""
-					if len(caption) < 200:
-						bot.send_photo(cid, post['link'], caption=treatTitle(caption), timeout=60)
-					else:
-						bot.send_photo(cid, post['link'], timeout=60)
-						bot.send_message(cid, treatTitle(caption))
+					url = post['link']
 				elif "video" in post['type'] or "gif" in post['type']:
 					caption = post['description'] if post['description'] else ""
-					if len(caption) < 200:
-						bot.send_document(cid, post['link'], caption=treatTitle(caption), timeout=60)
-					else:
-						bot.send_document(cid, post['link'], timeout=60)
-						bot.send_message(cid, treatTitle(caption))
+					url = post['link']
 				else:
 					pass
+				urls.append({'url':url, 'caption': caption})
+			
+			photos, videos = urlsForAlbum(urls)
+			
+			if photos:
+				sendAlbums("photo", photos, cid)
+			if videos:
+				sendAlbums("video", videos, cid)
+			
 			bot.edit_message_text("`Album sent.`", query.message.chat_id, message_id=query.message.message_id, parse_mode="Markdown", reply_markup=None)
 			data = ""
 		else: 
