@@ -35,6 +35,7 @@ Which of these keys are needed for what plugins.
 |**lastfm**|Every lastfm command, such as `np`, `fmalbums` and `fmtop`, `fmgrid` will work without this. | [last.fm](https://www.last.fm/api) |
 |**bing**|This is used in the `steamid` command to improve the speed of the search.| [Bing Web Search API](https://azure.microsoft.com/en-us/services/cognitive-services/bing-web-search-api/) |
 |**steam**| Almost every Steam command, even `steamid` will use this in case the bing search doesnt return any results, `steamdetails` and `steamnews`, `steamsales`, `autoSteam` and `steampage` will work without this. | [Steam Web API](https://steamcommunity.com/dev/apikey)| 
+|**facebook** |This will be needed in order to have the `AutoFacebookVideo` plugin up and running | [Facebook Graph API](https://developers.facebook.com/docs/graph-api) |
 |**tweepy**|This will be needed for any Twitter related plugin, such as `tw` and `autoTweet`.|[Twitter API](https://apps.twitter.com/)|
 
 If you dont want to include one of these, you should also change the plugin's active state to `False` in order to avoid future issues.
