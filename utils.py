@@ -45,6 +45,10 @@ bing_key 		= config['bing']
 steam_key 		= config['steam']
 imgur_id 		= config['imgur']
 
+# facebook stuff
+facebook_app_secret = config['facebook']['app_secret']
+facebook_app_id 	= config['facebook']['app_id']
+
 # tweepy stuff
 consumer_key 	= config['tweepy']['consumer_key']
 consumer_secret = config['tweepy']['consumer_secret']
@@ -136,6 +140,13 @@ def getImgur(url):
 	title = BeautifulSoup(request.text, 'html.parser').title.text
 	url = url.replace('gifv', 'mp4').replace('gif', 'mp4')
 	return url, title
+
+def getFBToken():
+    global facebook_app_secret
+    global facebook_app_id
+    url = 'https://graph.facebook.com/oauth/access_token?client_id=' + facebook_app_id + '&client_secret=' + facebook_app_secret + '&grant_type=client_credentials'
+    request = requests.get(url)
+    return request.json()['access_token']
 
 def getCID(update):
 	return update.message.chat.id
