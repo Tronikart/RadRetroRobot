@@ -3,10 +3,13 @@
 	"weather"			:	"",
 	"reddit"	 		:	"",
 	"lastfm"	 		:	"",
-	"google_time"		:	"",
+	"google_time"			:	"",
 	"bing"	 			:	"",
 	"steam"				:	"",
 	"imgur"				: 	"",
+	"facebook"			:	{		"app_secret" 			:	"",
+								"app_id"			:	""
+	},
 	"tweepy"			:	{
 								"consumer_key" 		:	"",
 								"consumer_secret"	:	"",
