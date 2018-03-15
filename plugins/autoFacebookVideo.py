@@ -7,7 +7,7 @@ def action(bot, update):
 	token = getFBToken()
 	try:
 		request_url = 'https://graph.facebook.com/'
-		url = re.findall(r'(.*http[s]?://www.facebook.com/(groups|.*)/(videos|\d.+)/\d.+/.*)', update.message.text)[0][0]
+		url = re.findall(r'(.*http[s]?://www.facebook.com/(groups|.*)/(videos|\S.+)/\d.+/.*)', update.message.text)[0][0]
 
 		# Getting the post ID from either a /video/ url or a /groups/ url
 		media_id = url.split('/')[5] if url.split('/')[4] == "videos" else url.split('/')[6]
@@ -19,6 +19,6 @@ def action(bot, update):
 		raise e
 	
 
-info = {	'triggers' 	:	r'.*http[s]?://www.facebook.com/(groups|.*)/(videos|\d.+)/\d.+/.*',
+info = {	'triggers' 	:	r'.*http[s]?://www.facebook.com/(groups|.*)/(videos|\S.+)/\d.+/.*',
 			'active'	: 	True,
 			'admin'		: 	False}
