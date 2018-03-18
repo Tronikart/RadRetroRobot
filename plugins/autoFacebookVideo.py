@@ -1,3 +1,4 @@
+from pprint import pprint
 from utils import *
 
 print ('loading ' + __name__)
@@ -14,7 +15,10 @@ def action(bot, update):
 
 		request = requests.get(request_url + media_id, {'access_token': token, 'fields' : 'source'})
 		mp4url = request.json()['source']
-		bot.send_document(cid, mp4url)
+		if url[-2:] != "-f":
+			bot.send_document(cid, mp4url, reply_to_message_id=update.message.message_id)
+		else:
+			bot.send_message(cid, "[direct link](" + mp4url + ")", parse_mode="Markdown", disable_web_page_preview=True,  reply_to_message_id=update.message.message_id)
 	except Exception as e:
 		raise e
 	
@@ -22,3 +26,4 @@ def action(bot, update):
 info = {	'triggers' 	:	r'.*http[s]?://www.facebook.com/(groups|.*)/(videos|\S.+)/\d.+/.*',
 			'active'	: 	True,
 			'admin'		: 	False}
+
