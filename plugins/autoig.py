@@ -13,12 +13,15 @@ def action(bot, update):
 				break
 			else:
 				pass
-		urls = []
-		for url in unique_urls:
-			urls.append({'url':url, 'caption': ""})
-		photos, videos = urlsForAlbum(urls)
-		print(photos)
-		sendAlbums("photo", photos, cid)
+		if len(unique_urls) > 1:
+			urls = []
+			for url in unique_urls:
+				urls.append({'url':url, 'caption': ""})
+			photos, videos = urlsForAlbum(urls)
+			print(photos)
+			sendAlbums("photo", photos, cid)
+		else:
+			pass
 	except:	
 		pass
 
