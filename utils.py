@@ -125,13 +125,12 @@ def getJson(url_get):
 
 def getGfy(url):
 	rname = re.findall(r'gfycat.com/[gifs/detail/]*(\w*)', url)
-	data = requests.get('https://gfycat.com/cajax/get/' + rname[0])
+	data = requests.get('https://api.gfycat.com/v1/gfycats/' + rname[0])
 	url = data.json()['gfyItem']['mp4Url']
 	url2 = data.json()['gfyItem']['mobileUrl']
-	url3 = data.json()['gfyItem']['miniUrl']
 	title = data.json()['gfyItem']['title'] if data.json()['gfyItem']['title'] else ""
 	print (rname, data, url)
-	return url, url2, url3, title
+	return url, url2, title
 
 def getImgur(url):
 	url = re.findall(r'(http[s]?://i.imgur.com/.+.gif[v]?)', url)[0]
@@ -199,6 +198,9 @@ def sendAlbums(data_type, array, cid):
 				stop += 10
 				number -= 10
 		else:
+			print("\n\n--------------------------------")
+			print(array)
+			print("\n\n--------------------------------")
 			bot.send_media_group(cid, array)
 	else:
 		if len(array) > 10:
