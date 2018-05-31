@@ -215,6 +215,15 @@ def sendAlbums(data_type, array, cid):
 		else:
 			bot.send_media_group(cid, array)
 
+def download_video(url):
+    request = requests.get(url, stream=True)
+    with open('@RadRetroRobot_Downloaded_Video.mp4', 'wb') as f:
+        for chunk in request.iter_content(chunk_size=1024): 
+            if chunk: # filter out keep-alive new chunks
+                f.write(chunk)
+                #f.flush() commented by recommendation from J.F.Sebastian
+    return True
+
 def treatTitle(title):
 	title = title.replace("&amp;", "&")
 	title = title.replace("&#39;", "\'")
