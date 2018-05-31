@@ -25,6 +25,6 @@ def action(bot, update):
 	except:	
 		pass
 
-info = {	'triggers' 	:	r'.*http[s]?.*instagram.com/p/[a-zA-Z0-9]+/',
+info = {	'triggers' 	:	r'.*http[s]?.*instagram.com/p/[a-zA-Z0-9]+/.*',
 			'active'	: 	True,
 			'admin'		: 	False}
