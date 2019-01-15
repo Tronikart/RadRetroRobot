@@ -8,23 +8,22 @@ def action(bot, update, args):
 	if search:
 		url = "http://api.urbandictionary.com/v0/define?term=" + search
 		request = requests.get(url)
-		if request.status_code == 200:
+		if request.ok:
 			data = request.json()
-			if data['result_type'] == 'exact':
+			if data['list']:
 				if len(data['list'][0]['definition']) < 1000:
-					definition = data['list'][0]['definition']
-					definition = definition.replace("`", "'")
-					example = "Example:\n" + data['list'][0]['example']
+					definition = data['list'][0]['definition'].replace("`", "'")
+					example = f"Example:\n{data['list'][0]['example']}"
 				else:
 					definition = "Some idiot thought it was a nice idea to write a wall of text as definition, please refer to the link below.\n"
 					example = ""
 				permalink = data['list'][0]['permalink']
 				word = data['list'][0]['word']
 				definition = definition.rstrip('].').lstrip('[')
-				message_ub = u"[" + word + "](" + permalink + ")\n\n`" + definition + "\n\n" + example + "`"
+				message_ub = f"[{word}]({permalink})\n\n`{definition}\n\n{example}`"
 				bot.send_message(cid, message_ub, parse_mode="Markdown", disable_web_page_preview=True)
 			else:
-				bot.send_message(cid, u"`No results found for {search}.`".format(search=search), parse_mode="Markdown")
+				bot.send_message(cid, f"`No results found for {search}.`", parse_mode="Markdown")
 		else:
 			bot.send_message(cid, '`There has been an error, please wait before trying again.`', parse_mode="Markdown")
 	else:
