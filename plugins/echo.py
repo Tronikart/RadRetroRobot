@@ -4,7 +4,7 @@ print ('loading ' + __name__)
 
 def action(bot, update, args):
 	cid = getCID(update)
-	msg = getContent(update)
+	msg = update.message.text.replace('/echo ', '').replace('/print ', '')
 	if msg:
 		bot.send_message(cid, u"`{msg}`".format(msg=msg), parse_mode="Markdown")
 	else:

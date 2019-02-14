@@ -15,8 +15,8 @@ def action(bot, update, args):
 			update.message.reply_text(text_messages['ping'].format(name=uName, uname=usName, lname=lname, uid=uid), parse_mode="Markdown", reply_to_message_id=update.message.message_id)
 
 	elif update.message.chat.type == 'group' or update.message.chat.type == 'supergroup':
-		uid = str(message.from_user.id)
-		gid = str(message.chat.id).lstrip('-')
+		uid = str(update.message.from_user.id)
+		gid = str(update.message.chat.id).lstrip('-')
 		gName = update.message.chat.title
 		if lname != None:
 			update.message.reply_text(text_messages['pinggroup'].format(name=uName, uname=usName, lname=lname, uid=uid, gName=gName, gid=gid), parse_mode="Markdown", reply_to_message_id=update.message.message_id)
