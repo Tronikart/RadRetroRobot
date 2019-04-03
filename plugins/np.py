@@ -4,10 +4,10 @@ print ('loading ' + __name__)
 
 def action(bot, update, args):
 	uid = str(getUID(update))
-	fmUsers = loadjson("fmuser")
+	fmUsers = loadjson("userlist")
 	content = ' '.join(args)
-	if uid in fmUsers:
-		url = "http://ws.audioscrobbler.com/2.0/?method=user.getRecentTracks&format=json&user=" + fmUsers[uid] + "&api_key=" + lastfm_key + "&limit=1"
+	if fmUsers[uid]['fmuser']:
+		url = "http://ws.audioscrobbler.com/2.0/?method=user.getRecentTracks&format=json&user=" + fmUsers[uid]['fmuser'] + "&api_key=" + lastfm_key + "&limit=1"
 		request = requests.get(url)
 		data = request.json() 
 		if request.status_code == 200:

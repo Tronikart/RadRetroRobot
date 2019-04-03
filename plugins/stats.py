@@ -6,8 +6,15 @@ def action(bot, update, args):
 	uid = getUID(update)
 	cid = getCID(update)
 	if uid == adminid:
-		users = str(len(loadjson("userlist")))
-		lastfm_users = str(len(loadjson("fmuser")))
+		userlist = loadjson("userlist")
+		users = str(len(userlist))
+		temp = []
+		for user in userlist:
+			if userlist[user]['fmuser']:
+				temp.append(user)
+			else:
+				continue
+		lastfm_users = str(len(temp))
 		groups = str(len(loadjson("grouplist")))
 		now = datetime.now()
 		diff = now - uptime

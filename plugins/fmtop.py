@@ -5,9 +5,9 @@ print ('loading ' + __name__)
 def action(bot, update, args):
 	cid = getCID(update)
 	uid = str(getUID(update))
-	fmUsers = loadjson("fmuser")
-	if uid in fmUsers:
-		url = "http://ws.audioscrobbler.com/2.0/?method=user.getTopArtists&format=json&user=" + fmUsers[uid] + "&api_key=" + lastfm_key + "&period=7day&limit=5"
+	fmUsers = loadjson("userlist")
+	if fmUsers[uid]['fmuser']:
+		url = "http://ws.audioscrobbler.com/2.0/?method=user.getTopArtists&format=json&user=" + fmUsers[uid]['fmuser'] + "&api_key=" + lastfm_key + "&period=7day&limit=5"
 		request = requests.get(url)
 		data = request.json()
 		artists = ""

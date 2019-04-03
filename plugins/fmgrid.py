@@ -6,10 +6,10 @@ def action(bot, update, args):
 	cid = getCID(update)
 	uid = str(getUID(update))
 	options = args
-	fmUsers = loadjson("fmuser")
+	fmUsers = loadjson("userlist")
 	validTypes = ["7days", "1month", "3month", "6month", "12month", "overall"]
 	validSizes = ["3x3", "4x4", "5x5"]
-	if uid in fmUsers:
+	if fmUsers[uid]['fmuser']:
 		try:
 			if options:
 				print (options)
@@ -26,7 +26,7 @@ def action(bot, update, args):
 			else:
 				gridtype = "7day"
 				gridsize = "3x3"
-			url = "http://www.tapmusic.net/collage.php?type=" + gridtype + "&size=" + gridsize + "&user=" + fmUsers[uid]
+			url = "http://www.tapmusic.net/collage.php?type=" + gridtype + "&size=" + gridsize + "&user=" + fmUsers[uid]['fmuser']
 			soup = makesoup(url)
 			if "Error" in soup.text:
 				update.message.reply_text("`There has been an error, heres some info:`\n\n" + "`" + soup.text + "`", parse_mode="Markdown", reply_to_message_id=update.message.message_id)
