@@ -60,11 +60,9 @@ auth.set_access_token(access_token, access_secret)
 
 api = tweepy.API(auth)
 
-adminid = 25929203
+adminid = ### Set your ID here
+adminTwitterUser = ### Set your Twitter User here
 botid = bot.getMe().id
-degeneratesgroup = -37148522
-tesorosgroup = -1001003269822
-main_group = -448768
 uptime = datetime.now()
 
 def get_help(info):
@@ -249,15 +247,27 @@ def treatLink(link):
 	link = link.replace('"', "%22")
 	return link
 
-def addUser(userID, userName, filename):
-	user = {
-		userID : userName
-	}
+def addUser(userID, userName, filename, newUser=False, twitterVerifier='', requestToken='', clearData=False):
+	if newUser:
+		user = {
+			userID : {'name': userName, 'fmuser' : '', 'twitter' : {'verifier': '', 'token' : ''}}
+		}
 	with open(filename + '.json') as f:
 		data = json.load(f)
-	data.update(user)
+	
+	if twitterVerifier and not clearData:
+		data[str(userID)]['twitter']['verifier'] = twitterVerifier
+	elif clearData:
+		data[str(userID)]['twitter']['verifier'] = ''
+
+	if requestToken and not clearData:
+		data[str(userID)]['twitter']['token'] = requestToken
+	elif clearData:
+		data[str(userID)]['twitter']['token'] = ''
+
 	with open(filename + '.json', 'w') as f:
 		json.dump(data, f)
+
 
 def loadjson(filename):
 	with open(filename + '.json') as f:
